@@ -1,0 +1,125 @@
+/* Reset e base */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f0f0;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    min-width: 320px;
+}
+
+header {
+    background-color: #007BFF;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    width: 100%;
+}
+
+h1 {
+    margin: 0;
+}
+
+main {
+    padding: 20px;
+    text-align: center;
+    width: 100%;
+    max-width: 420px;
+}
+
+.game-mode {
+    margin: 20px 0;
+}
+
+button {
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin: 5px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#game-board {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+    gap: 5px;
+    margin: 20px auto 10px;
+}
+
+.cell {
+    background-color: white;
+    border: 2px solid #007BFF;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    user-select: none;
+}
+
+.cell:hover {
+    background-color: #e0e0e0;
+}
+
+.hidden {
+    display: none;
+}
+
+#game-info {
+    margin-top: 10px;
+}
+
+#status {
+    font-size: 18px;
+    margin: 10px 0;
+}
+
+#restart {
+    background-color: #28a745;
+    padding: 10px 30px;
+    margin-top: 10px;
+}
+
+#restart:hover {
+    background-color: #218838;
+}
+
+#scoreboard {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 15px;
+    font-size: 17px;
+    color: #007BFF;
+    font-weight: 600;
+    user-select: none;
+}
+
+@media (max-width: 400px) {
+    #game-board {
+        grid-template-columns: repeat(3, 80px);
+        grid-template-rows: repeat(3, 80px);
+    }
+    .cell {
+        font-size: 28px;
+    }
+}
+
