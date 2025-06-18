@@ -1,0 +1,1 @@
+// Este arquivo contém a funcionalidade principal da página index.html, como manipulação de eventos e interações com a galeria.

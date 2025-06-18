@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Galeria do Leo - Estilo Steam</title>
+  <style>
+    /* Reset e base */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #1b2838;
+      color: #c6d4df;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+    a:hover,
+    a:focus {
+      text-decoration: underline;
+      outline-offset: 4px;
+      outline-color: #66c0f4;
+      outline-style: solid;
+      outline-width: 2px;
+    }
+
+    header {
+      background-color: #171a21;
+      padding: 1.5rem 3rem;
+      text-align: center;
+      border-bottom: 1px solid #2a475e;
+      user-select: none;
+    }
+    header h1 {
+      margin: 0;
+      font-weight: 700;
+      font-size: 2rem;
+      color: #66c0f4;
+      letter-spacing: 1px;
+    }
+
+    main {
+      flex-grow: 1;
+      padding: 2rem 3rem;
+      max-width: 1280px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    section > h2 {
+      font-weight: 600;
+      font-size: 1.75rem;
+      color: #ffffff;
+      margin-bottom: 1.5rem;
+      user-select: none;
+    }
+
+    /* Grid container para os cards */
+    ul.game-grid {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.5rem;
+    }
+    ul.game-grid li {
+      background-color: #2a475e;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgb(0 0 0 / 0.7);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                  box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    ul.game-grid li:hover,
+    ul.game-grid li:focus-within {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 24px rgb(102 192 244 / 0.7);
+      z-index: 10;
+    }
+
+    ul.game-grid li a {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      color: inherit;
+    }
+
+    /* Imagem em cima do card */
+    .game-image {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background-color: #171a21;
+      background-position: center;
+      background-size: cover;
+      border-bottom: 1px solid #1b2838;
+      flex-shrink: 0;
+    }
+
+    /* Corpo do card */
+    .game-info {
+      padding: 0.75rem 1rem;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .game-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #c6d4df;
+      line-height: 1.2;
+      margin: 0;
+      user-select: none;
+    }
+
+    footer {
+      background-color: #171a21;
+      padding: 1rem 3rem;
+      color: #66c0f4;
+      text-align: center;
+      font-size: 0.875rem;
+      border-top: 1px solid #2a475e;
+      user-select: none;
+    }
+
+    /* Scrollbar mods - opcionais */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #171a21;
+    }
+    ::-webkit-scrollbar-thumb {
+      background-color: #66c0f4;
+      border-radius: 10px;
+      border: 2px solid #171a21;
+    }
+
+    /* Responsividade */
+    @media (max-width: 640px) {
+      main {
+        padding: 1rem 1rem;
+      }
+      ul.game-grid {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 1rem;
+      }
+      .game-info {
+        padding: 0.5rem 0.75rem;
+      }
+      .game-title {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Galeria da Leo</h1>
+  </header>
+  <main>
+    <section>
+      <h2>Jogos Disponíveis</h2>
+      <ul class="game-grid" role="list">
+        <li tabindex="0">
+          <a href="jogos/jogo0.html" aria-label="Jogo 0">
+            <div class="game-image" style="background-image: url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/5722ced7-2c61-4a5a-9f5a-d6ac19425c90.png')"></div>
+            <div class="game-info">
+              <h3 class="game-title">Jogo da Velha</h3>
+            </div>
+          </a>
+        </li>
+        <li tabindex="0">
+          <a href="jogos/jogo1.html" aria-label="Jogo 1">
+            <div class="game-image" style="background-image: url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/0eb353b1-9204-4c81-a4ab-a305f5d46918.png')"></div>
+            <div class="game-info">
+              <h3 class="game-title">Jogo 1</h3>
+            </div>
+          </a>
+        </li>
+        <li tabindex="0">
+          <a href="jogos/jogo2.html" aria-label="Jogo 2">
+            <div class="game-image" style="background-image: url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/e3341d99-9c4e-4b88-aff9-0aec20e58db1.png')"></div>
+            <div class="game-info">
+              <h3 class="game-title">Jogo 2</h3>
+            </div>
+          </a>
+        </li>
+        <li tabindex="0">
+          <a href="jogos/jogo3.html" aria-label="Jogo 3">
+            <div class="game-image" style="background-image: url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/c43e8e57-08a6-4d35-940f-4ebf1c7633cf.png')"></div>
+            <div class="game-info">
+              <h3 class="game-title">Jogo 3</h3>
+            </div>
+          </a>
+        </li>
+        <li tabindex="0">
+          <a href="jogos/jogo4.html" aria-label="Jogo 4">
+            <div class="game-image" style="background-image: url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/e7639e6a-9a55-492c-8b46-6489e68243ba.png')"></div>
+            <div class="game-info">
+              <h3 class="game-title">Jogo 4</h3>
+            </div>
+          </a>
+        </li>
+        <li tabindex="0">
+          <a href="jogos/jogo5.html" aria-label="Jogo 5">
+            <div class="game-image" style="background-image: url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/555d1011-f0aa-4fc3-87f0-c70e4de42fe4.png')"></div>
+            <div class="game-info">
+              <h3 class="game-title">Jogo 5</h3>
+            </div>
+          </a>
+        </li>
+        <li tabindex="0">
+          <a href="jogos/jogo6.html" aria-label="Jogo 6">
+            <div class="game-image" style="background-image: url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/897e26b2-6ef2-4e5e-b4cd-e57a2d3c9225.png')"></div>
+            <div class="game-info">
+              <h3 class="game-title">Jogo 6</h3>
+            </div>
+          </a>
+        </li>
+        <li tabindex="0">
+          <a href="jogos/jogo7.html" aria-label="Jogo 7">
+            <div class="game-image" style="background-image: url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/46ee10b2-612a-4720-918d-655ec56dd548.png')"></div>
+            <div class="game-info">
+              <h3 class="game-title">Jogo 7</h3>
+            </div>
+          </a>
+        </li>
+        <li tabindex="0">
+          <a href="jogos/jogo8.html" aria-label="Jogo 8">
+            <div class="game-image" style="background-image: url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/ef62bdaf-c8a7-4328-8bfa-ceb24bf4dbaa.png')"></div>
+            <div class="game-info">
+              <h3 class="game-title">Jogo 8</h3>
+            </div>
+          </a>
+        </li>
+        <li tabindex="0">
+          <a href="jogos/jogo9.html" aria-label="Jogo 9">
+            <div class="game-image" style="background-image: url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/415ce7bf-b6e1-4fbb-bc98-b1ac3b6457e5.png')"></div>
+            <div class="game-info">
+              <h3 class="game-title">Jogo 9</h3>
+            </div>
+          </a>
+        </li>
+        <li tabindex="0">
+          <a href="jogos/jogo10.html" aria-label="Jogo 10">
+            <div class="game-image" style="background-image: url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/e6b1661d-190c-4c2b-a3a1-43749700c074.png')"></div>
+            <div class="game-info">
+              <h3 class="game-title">Jogo 10</h3>
+            </div>
+          </a>
+        </li>
+        <li tabindex="0">
+          <a href="jogos/jogo11.html" aria-label="Jogo 11">
+            <div class="game-image" style="background-image: url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/27c334da-3a73-4b9e-9fd3-6031aba15ce0.png')"></div>
+            <div class="game-info">
+              <h3 class="game-title">Jogo 11</h3>
+            </div>
+          </a>
+        </li>
+        <li tabindex="0">
+          <a href="jogos/jogo12.html" aria-label="Jogo 12">
+            <div class="game-image" style="background-image: url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/8ed14946-2ef4-4b2d-86d1-86842b0df289.png')"></div>
+            <div class="game-info">
+              <h3 class="game-title">Jogo 12</h3>
+            </div>
+          </a>
+        </li>
+        <li tabindex="0">
+          <a href="jogos/jogo13.html" aria-label="Jogo 13">
+            <div class="game-image" style="background-image: url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/df9c0a6b-0182-478d-82c9-4f7090a0bf02.png')"></div>
+            <div class="game-info">
+              <h3 class="game-title">Jogo 13</h3>
+            </div>
+          </a>
+        </li>
+        <li tabindex="0">
+          <a href="jogos/jogo14.html" aria-label="Jogo 14">
+            <div class="game-image" style="background-image: url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/03275b52-62e0-43f5-bfac-dd9bb9e94706.png')"></div>
+            <div class="game-info">
+              <h3 class="game-title">Jogo 14</h3>
+            </div>
+          </a>
+        </li>
+        <li tabindex="0">
+          <a href="jogos/jogo15.html" aria-label="Jogo 15">
+            <div class="game-image" style="background-image: url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/271db8fa-3e12-4858-aa9d-73f0c635056a.png')"></div>
+            <div class="game-info">
+              <h3 class="game-title">Jogo 15</h3>
+            </div>
+          </a>
+        </li>
+        <li tabindex="0">
+          <a href="jogos/jogo16.html" aria-label="Jogo 16">
+            <div class="game-image" style="background-image: url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/0815c523-bf58-47ca-b3ad-60a5c6ecc3d3.png')"></div>
+            <div class="game-info">
+              <h3 class="game-title">Jogo 16</h3>
+            </div>
+          </a>
+        </li>
+        <li tabindex="0">
+          <a href="jogos/jogo17.html" aria-label="Jogo 17">
+            <div class="game-image" style="background-image: url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/10d25841-927e-4372-914b-b6e69d794c0e.png')"></div>
+            <div class="game-info">
+              <h3 class="game-title">Jogo 17</h3>
+            </div>
+          </a>
+        </li>
+        <li tabindex="0">
+          <a href="jogos/jogo18.html" aria-label="Jogo 18">
+            <div class="game-image" style="background-image: url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/233d1099-d021-479c-83bf-fe6d2c8ce3bb.png')"></div>
+            <div class="game-info">
+              <h3 class="game-title">Jogo 18</h3>
+            </div>
+          </a>
+        </li>
+        <li tabindex="0">
+          <a href="jogos/jogo19.html" aria-label="Jogo 19">
+            <div class="game-image" style="background-image: url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/bfb03f4c-1830-4ccb-83ba-8ac39c05a323.png')"></div>
+            <div class="game-info">
+              <h3 class="game-title">Jogo 19</h3>
+            </div>
+          </a>
+        </li>
+        <li tabindex="0">
+          <a href="jogos/jogo20.html" aria-label="Jogo 20">
+            <div class="game-image" style="background-image: url('https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/b368db22-3d03-42e9-84ac-871fc42ad9b9.png')"></div>
+            <div class="game-info">
+              <h3 class="game-title">Jogo 20</h3>
+            </div>
+          </a>
+        </li>
+      </ul>
+    </section>
+  </main>
+  <footer>
+    <p>© 2023 Galeria do Leo. Todos os direitos reservados.</p>
+  </footer>
+</body>
+</html>
+

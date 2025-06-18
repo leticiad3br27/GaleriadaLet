@@ -1,0 +1,185 @@
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    min-height: 100vh;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    background: rgba(30, 60, 114, 0.95);
+    padding: 2rem 0 1rem 0;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(30, 60, 114, 0.2);
+}
+
+header h1 {
+    font-size: 2.5rem;
+    letter-spacing: 2px;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 1px 2px 8px #222;
+}
+
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+section {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(30, 60, 114, 0.15);
+    padding: 2rem 2.5rem;
+    margin: 1.5rem 0;
+    min-width: 320px;
+    max-width: 400px;
+    width: 100%;
+    transition: box-shadow 0.3s;
+}
+
+section:hover {
+    box-shadow: 0 8px 32px rgba(30, 60, 114, 0.25);
+}
+
+h2 {
+    color: #ffd700;
+    margin-bottom: 1.2rem;
+    text-align: center;
+    font-size: 1.5rem;
+}
+
+.game-mode {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+button {
+    background: linear-gradient(90deg, #ffd700 60%, #ffb300 100%);
+    color: #222;
+    border: none;
+    border-radius: 8px;
+    padding: 0.8rem 1.5rem;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(30, 60, 114, 0.15);
+    transition: background 0.2s, transform 0.2s;
+}
+
+button:hover, button:focus {
+    background: linear-gradient(90deg, #ffb300 60%, #ffd700 100%);
+    transform: scale(1.07);
+    outline: none;
+}
+
+#game-section.hidden {
+    display: none;
+}
+
+#game-board {
+    display: grid;
+    grid-template-columns: repeat(3, 80px);
+    grid-template-rows: repeat(3, 80px);
+    gap: 12px;
+    justify-content: center;
+    margin: 1.5rem auto;
+}
+
+.cell {
+    background: rgba(255,255,255,0.15);
+    border-radius: 10px;
+    font-size: 2.5rem;
+    color: #ffd700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(30, 60, 114, 0.10);
+    transition: background 0.2s, transform 0.1s;
+    user-select: none;
+    font-weight: bold;
+}
+
+.cell:hover {
+    background: rgba(255,255,255,0.25);
+    transform: scale(1.05);
+}
+
+#game-info {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+#status {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: #fff;
+    min-height: 24px;
+}
+
+#restart {
+    margin: 1rem 0;
+    background: linear-gradient(90deg, #ffb300 60%, #ffd700 100%);
+    color: #222;
+}
+
+#restart.hidden {
+    display: none;
+}
+
+#scoreboard {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 1rem;
+    font-size: 1.1rem;
+    color: #fff;
+}
+
+#scoreboard span {
+    background: rgba(30, 60, 114, 0.25);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+footer {
+    background: rgba(30, 60, 114, 0.95);
+    text-align: center;
+    padding: 1rem 0;
+    font-size: 1rem;
+    color: #ffd700;
+    letter-spacing: 1px;
+    box-shadow: 0 -2px 8px rgba(30, 60, 114, 0.2);
+    margin-top: auto;
+}
+
+/* Responsividade */
+@media (max-width: 500px) {
+    section {
+        padding: 1rem 0.5rem;
+        min-width: unset;
+        max-width: 98vw;
+    }
+    #game-board {
+        grid-template-columns: repeat(3, 60px);
+        grid-template-rows: repeat(3, 60px);
+        gap: 8px;
+    }
+    .cell {
+        font-size: 1.7rem;
+    }
+}

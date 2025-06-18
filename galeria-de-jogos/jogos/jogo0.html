@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Velha - Galeria de Jogos</title>
+    <link rel="stylesheet" href="../css/jogo-da-velha.css">
+</head>
+<body>
+    <header>
+        <h1>Jogo da Velha</h1>
+    </header>
+    <main>
+        <section>
+            <h2>Escolha o Modo de Jogo</h2>
+            <div class="game-mode">
+                <button id="two-players">2 Jogadores</button>
+                <button id="vs-computer">1 Jogador (vs Computador)</button>
+            </div>
+        </section>
+        <section id="game-section" class="hidden">
+            <h2 id="game-title">Jogo da Velha</h2>
+            <div id="game-board"></div>
+            <div id="game-info">
+                <p id="status"></p>
+                <button id="restart" class="hidden">Reiniciar Jogo</button>
+                <div id="scoreboard">
+                    <span>Jogador X: <span id="scoreX">0</span></span>
+                    <span>Jogador O: <span id="scoreO">0</span></span>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2023 Galeria de Jogos. Todos os direitos reservados.</p>
+    </footer>
+    <script src="../js/jogo-da-velha.js"></script>
+</body>
+</html>
