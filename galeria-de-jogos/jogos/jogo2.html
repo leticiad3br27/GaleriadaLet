@@ -3,27 +3,288 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo 2 - Galeria de Jogos</title>
-    <link rel="stylesheet" href="../css/jogo2.css">
-    <script src="../js/jogo2.js" defer></script>
+    <title>FlapBid</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        #gameCanvas {
+            display: block;
+            margin: 0 auto;
+        }
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(to bottom, #87CEEB, #E0F6FF);
+            z-index: 10;
+        }
+        .screen.hidden {
+            display: none;
+        }
+        .button {
+            padding: 15px 30px;
+            font-size: 24px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .button:hover {
+            transform: scale(1.1);
+        }
+        .score {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 24px;
+            color: white;
+            text-shadow: 2px 2px 2px rgba(0,0,0,0.5);
+        }
+        .high-score {
+            font-size: 18px;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Jogo 2</h1>
-    </header>
-    <main>
-        <section>
-            <h2>Descrição do Jogo 2</h2>
-            <p>Aqui você pode colocar uma descrição detalhada do Jogo 2, incluindo suas características, jogabilidade e outros detalhes relevantes.</p>
-            <img src="../imagens/jogo2-thumbnail.jpg" alt="Thumbnail do Jogo 2">
-        </section>
-        <section>
-            <h2>Informações Adicionais</h2>
-            <p>Mais informações sobre o Jogo 2 podem ser adicionadas aqui, como desenvolvedor, data de lançamento, e links para download ou compra.</p>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2023 Galeria de Jogos. Todos os direitos reservados.</p>
-    </footer>
+    <div id="startScreen" class="screen">
+        <h1>FlapBid</h1>
+        <button class="button" onclick="startGame()">Iniciar</button>
+    </div>
+    <div id="gameOverScreen" class="screen hidden">
+        <h1>Fim de Jogo</h1>
+        <p id="finalScore"></p>
+        <p id="highScore" class="high-score"></p>
+        <button class="button" onclick="restartGame()">Reiniciar</button>
+    </div>
+    <div class="score" id="scoreDisplay">Pontuação: 0</div>
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            width = canvas.width;
+            height = canvas.height;
+        }
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const startScreen = document.getElementById('startScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const finalScore = document.getElementById('finalScore');
+        const highScoreDisplay = document.getElementById('highScore');
+
+        let bird = {
+            x: 100,
+            y: height / 2,
+            radius: 20,
+            velocity: 0,
+            gravity: 0.3,
+            jump: -7,
+            rotation: 0
+        };
+
+        let pipes = [];
+        let score = 0;
+        let highScore = localStorage.getItem('flapbidHighScore') || 0;
+        let gameState = 'start';
+        const pipeWidth = 50;
+        const pipeGap = 150;
+        const pipeSpeed = 3;
+        let frameCount = 0;
+        const pipeFrequency = 90;
+
+        // Cloud positions for parallax
+        let clouds = [
+            { x: 200, y: 100, size: 50 },
+            { x: 400, y: 150, size: 70 },
+            { x: 600, y: 80, size: 60 }
+        ];
+
+        function drawBird() {
+            ctx.save();
+            ctx.translate(bird.x, bird.y);
+            ctx.rotate(bird.rotation);
+            ctx.fillStyle = '#FFD700'; // Yellow bird
+            ctx.beginPath();
+            ctx.arc(0, 0, bird.radius, 0, Math.PI * 2);
+            ctx.fill();
+            // Eyes
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(10, -5, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = 'black';
+            ctx.beginPath();
+            ctx.arc(10, -5, 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function drawPipes() {
+            pipes.forEach(pipe => {
+                ctx.fillStyle = '#228B22'; // Green pipes
+                // Top pipe
+                ctx.fillRect(pipe.x, 0, pipeWidth, pipe.top);
+                // Bottom pipe
+                ctx.fillRect(pipe.x, pipe.top + pipeGap, pipeWidth, height);
+                // Pipe details
+                ctx.fillStyle = '#006400';
+                ctx.fillRect(pipe.x - 5, 0, 5, pipe.top);
+                ctx.fillRect(pipe.x - 5, pipe.top + pipeGap, 5, height);
+                ctx.fillRect(pipe.x + pipeWidth, 0, 5, pipe.top);
+                ctx.fillRect(pipe.x + pipeWidth, pipe.top + pipeGap, 5, height);
+            });
+        }
+
+        function drawBackground() {
+            // Gradient background
+            const gradient = ctx.createLinearGradient(0, 0, 0, height);
+            gradient.addColorStop(0, '#87CEEB');
+            gradient.addColorStop(1, '#E0F6FF');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+
+            // Clouds with parallax
+            clouds.forEach(cloud => {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.beginPath();
+                ctx.arc(cloud.x, cloud.y, cloud.size, 0, Math.PI * 2);
+                ctx.fill();
+                cloud.x -= 0.5; // Slower movement for parallax
+                if (cloud.x + cloud.size < 0) {
+                    cloud.x = width + cloud.size;
+                }
+            });
+        }
+
+        function updateBird() {
+            bird.velocity += bird.gravity;
+            bird.y += bird.velocity;
+            bird.rotation = Math.min(Math.max(bird.velocity * 0.05, -0.5), 0.5);
+
+            if (bird.y + bird.radius > height || bird.y - bird.radius < 0) {
+                gameOver();
+            }
+        }
+
+        function updatePipes() {
+            if (frameCount % pipeFrequency === 0) {
+                const gapY = Math.random() * (height - pipeGap - 200) + 100;
+                pipes.push({ x: width, top: gapY });
+            }
+
+            pipes.forEach(pipe => {
+                pipe.x -= pipeSpeed;
+            });
+
+            pipes = pipes.filter(pipe => pipe.x + pipeWidth > 0);
+
+            // Score update
+            pipes.forEach(pipe => {
+                if (!pipe.scored && pipe.x + pipeWidth < bird.x) {
+                    score++;
+                    pipe.scored = true;
+                    scoreDisplay.textContent = `Pontuação: ${score}`;
+                }
+            });
+        }
+
+        function checkCollision() {
+            pipes.forEach(pipe => {
+                if (
+                    bird.x + bird.radius > pipe.x &&
+                    bird.x - bird.radius < pipe.x + pipeWidth &&
+                    (bird.y - bird.radius < pipe.top || bird.y + bird.radius > pipe.top + pipeGap)
+                ) {
+                    gameOver();
+                }
+            });
+        }
+
+        function gameOver() {
+            gameState = 'gameOver';
+            gameOverScreen.classList.remove('hidden');
+            finalScore.textContent = `Pontuação Final: ${score}`;
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('flapbidHighScore', highScore);
+            }
+            highScoreDisplay.textContent = `Melhor Pontuação: ${highScore}`;
+        }
+
+        function startGame() {
+            gameState = 'playing';
+            startScreen.classList.add('hidden');
+            score = 0;
+            scoreDisplay.textContent = `Pontuação: ${score}`;
+            bird.y = height / 2;
+            bird.velocity = 0;
+            bird.rotation = 0;
+            pipes = [];
+            frameCount = 0;
+        }
+
+        function restartGame() {
+            gameOverScreen.classList.add('hidden');
+            startGame();
+        }
+
+        function jump() {
+            if (gameState === 'playing') {
+                bird.velocity = bird.jump;
+            }
+        }
+
+        function gameLoop() {
+            if (gameState === 'playing') {
+                ctx.clearRect(0, 0, width, height);
+                drawBackground();
+                updateBird();
+                updatePipes();
+                checkCollision();
+                drawPipes();
+                drawBird();
+                frameCount++;
+            }
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Event listeners
+        canvas.addEventListener('click', jump);
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') jump();
+        });
+
+        // Virtual button for touch devices
+        const virtualButton = document.createElement('button');
+        virtualButton.className = 'button';
+        virtualButton.style.position = 'absolute';
+        virtualButton.style.bottom = '20px';
+        virtualButton.style.right = '20px';
+        virtualButton.textContent = 'Pular';
+        virtualButton.addEventListener('click', jump);
+        document.body.appendChild(virtualButton);
+
+        gameLoop();
+    </script>
 </body>
 </html>

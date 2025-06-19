@@ -3,31 +3,259 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo 7</title>
-    <link rel="stylesheet" href="../css/jogo7.css">
-    <script src="../js/jogo7.js" defer></script>
+    <title>Jogo de Digitação Rápida</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes typewriter {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+        @keyframes blink-caret {
+            from, to { border-color: transparent; }
+            50% { border-color: #f97316; }
+        }
+        .typewriter {
+            overflow: hidden;
+            width: 0;
+            animation: typewriter 2s steps(40, end) forwards;
+        }
+        .caret {
+            border-right: 0.15em solid #f97316;
+            animation: blink-caret 0.75s step-end infinite;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e3a8a, #4c1d95);
+        }
+        .word-highlight {
+            transition: all 0.3s ease;
+        }
+        .word-highlight.correct {
+            color: #10b981;
+            transform: scale(1.1);
+        }
+        .word-highlight.incorrect {
+            color: #ef4444;
+            transform: scale(0.9);
+        }
+    </style>
 </head>
-<body>
-    <header>
-        <h1>Detalhes do Jogo 7</h1>
-    </header>
-    <main>
-        <section>
-            <h2>Descrição</h2>
-            <p>Aqui você pode adicionar uma descrição detalhada do Jogo 7.</p>
-        </section>
-        <section>
-            <h2>Imagens</h2>
-            <img src="../imagens/jogo7_thumbnail.jpg" alt="Miniatura do Jogo 7">
-            <p>Adicione mais imagens relacionadas ao Jogo 7 aqui.</p>
-        </section>
-        <section>
-            <h2>Links</h2>
-            <p>Links úteis ou informações adicionais sobre o Jogo 7 podem ser colocados aqui.</p>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2023 Galeria de Jogos</p>
-    </footer>
+<body class="gradient-bg flex items-center justify-center min-h-screen text-white font-sans">
+    <div id="game-container" class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl w-full max-w-2xl">
+        <div id="mode-selection" class="text-center">
+            <h1 class="text-4xl font-bold mb-4 typewriter">Jogo de Digitação Rápida</h1>
+            <p class="text-lg mb-6">Escolha o modo de jogo:</p>
+            <button id="words-mode" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg mr-4 transition duration-300">Palavras Soltas</button>
+            <button id="text-mode" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-300">Trechos de Livros</button>
+        </div>
+        <div id="game-screen" class="hidden text-center">
+            <div class="flex justify-between mb-4">
+                <p class="text-xl">Pontuação: <span id="score">0</span></p>
+                <p class="text-xl">Tempo: <span id="time">60</span>s</p>
+            </div>
+            <div class="bg-gray-800 bg-opacity-50 p-6 rounded-lg mb-4">
+                <p class="text-2xl font-mono">Palavra: <span id="current-word" class="word-highlight"></span></p>
+                <p class="text-xl font-mono mt-2">Digite: <span id="typed-word" class="caret"></span></p>
+            </div>
+            <div id="game-over" class="hidden">
+                <h2 class="text-3xl font-bold text-red-500">Fim de Jogo!</h2>
+                <p class="text-xl mt-2">Pontuação Final: <span id="final-score"></span></p>
+                <button id="restart" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg mt-4 transition duration-300">Jogar Novamente</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        let words = [
+            "casa", "sol", "lua", "rio", "mar", "ceu", "flor", "ar", "vida", "paz",
+            "amor", "luz", "dia", "noite", "estrela", "vento", "nuvem", "fogo", "agua", "terra","Limpeza", "Vassoura", "Rodo", "Pá", "Balde", "Pano", "Sabão", "Detergente", "Desinfetante", "Aspirador",
+            "Segurança", "Cadeado", "Alarme", "Câmera", "Seguro", "Polícia", "Bombeiro", "Emergência", "Capacete", "Cinto de segurança",
+            "Clima", "Calor", "Frio", "Chuva", "Neve", "Vento", "Tempestade", "Nevoeiro", "Geada", "Secura",
+            "Alimento", "Cereal", "Legume", "Verdura", "Fruta", "Carne", "Peixe", "Ovo", "Leite", "Queijo",
+            "Bebida", "Água", "Suco", "Refrigerante", "Café", "Chá", "Leite", "Cerveja", "Vinho", "Whisky",
+            "Doce", "Chocolate", "Bolo", "Sorvete", "Pudim", "Brigadeiro", "Beijinho", "Paçoca", "Pé de moleque", "Cocada",
+            "Tempero", "Sal", "Açúcar", "Pimenta", "Alho", "Cebola", "Salsa", "Coentro", "Louro", "Canela",
+            "Utensílio", "Garfo", "Faca", "Colher", "Prato", "Copo", "Xícara", "Panela", "Frigideira", "Assadeira",
+            "Material", "Papel", "Plástico", "Vidro", "Metal", "Madeira", "Tecido", "Couro", "Borracha", "Argila",
+            "Cor", "Vermelho", "Azul", "Amarelo", "Verde", "Roxo", "Laranja", "Preto", "Branco", "Cinza",
+            "Forma", "Círculo", "Quadrado", "Triângulo", "Retângulo", "Losango", "Estrela", "Coração", "Oval", "Linha",
+            "Tamanho", "Grande", "Pequeno", "Alto", "Baixo", "Largo", "Estreito", "Gordo", "Magro", "Comprido",
+            "Quantidade", "Muito", "Pouco", "Algum", "Nenhum", "Todo", "Vários", "Diversos", "Certo", "Inúmero"
+        ];
+        let bookExcerpts = [
+            "Era uma vez um pequeno príncipe que vivia num planeta pouco maior que ele.",
+            "Num buraco no chão vivia um hobbit. Não era um buraco úmido e sujo, mas confortável.",
+            "Todas as famílias felizes são iguais; as infelizes o são cada uma à sua maneira.",
+            "A felicidade só é real quando compartilhada.",
+            "O amor é feito de esquecimento ao próprio eu.",
+            "O mundo assombra-me menos quando penso que foi criado do mesmo modo que nossos sonhos.",
+            "O medo é o caminho para o lado negro. O medo leva à raiva, a raiva leva ao ódio, o ódio leva ao sofrimento.",
+            "Quem controla o passado controla o futuro. Quem controla o presente controla o passado.",
+            "Assim que o último homem tivesse visto a luz do sol pela última vez e morrido, o universo deixaria de existir.",
+            "Todas as famílias felizes se parecem, cada família infeliz é infeliz à sua maneira.",
+            "Ser ou não ser, eis a questão.",
+            "É uma verdade universalmente reconhecida que um homem solteiro e rico precisa de uma esposa.",
+            "Chamo-me Ishmael.",
+            "Era o melhor dos tempos, era o pior dos tempos...",
+            "Não tenho o costume de guardar ressentimentos.",
+            "Afinal, amanhã é outro dia.",
+            "Ele nunca havia suspeitado que existisse tanta água no universo.",
+            "Tudo o que é sólido desmancha no ar.",
+            "Eu sou um homem doente... sou um homem mau.",
+            "Viver é muito perigoso.",
+            "E agora, José?",
+            "Se fosse só sentir saudade, mas tem sempre alguma coisa mais.",
+            "Quem não comunica se trumbica.",
+            "Capitu, olhos de ressaca.",
+            "A liberdade é uma palavra que o sonho humano alimenta, não há ninguém que explique e ninguém que não entenda.",
+            "O sertão vai virar mar, o mar vai virar sertão.",
+            "Nunca houve um poeta tão maldito como eu.",
+            "Não sou nada. Nunca serei nada. Não posso querer ser nada. À parte isso, tenho em mim todos os sonhos do mundo.",
+            "Quero a delícia de poder sentir as coisas mais simples.",
+            "Não tenha pena dos mortos, e sim dos vivos, especialmente daqueles que vivem sem amor.",
+            "Um anel para todos governar.",
+            "A mente que se abre a uma nova ideia jamais volta ao seu tamanho original.",
+            "A esperança é algo muito perigoso.",
+            "Tudo começa com um desejo.",
+            "As estrelas são buracos no céu por onde o amor de nossos entes queridos brilha sobre nós para nos avisar que estão felizes.",
+            "O medo mata a mente.",
+            "A verdade é uma questão de imaginação.",
+            "Às vezes, a coisa mais corajosa que você pode fazer é continuar vivendo quando tudo o que você quer é morrer.",
+            "Ser diferente não é fácil, mas é necessário.",
+            "Você se torna eternamente responsável por aquilo que cativas.",
+            "Ame e faça o que quiser.",
+            "A vida é aquilo que acontece enquanto você está ocupado fazendo outros planos.",
+            "Liberdade é pouco. O que eu desejo ainda não tem nome.",
+            "A morte não é o contrário da vida, mas uma parte dela.",
+            "A única maneira de lidar com um mundo sem liberdade é tornar-se tão absolutamente livre que sua própria existência seja um ato de rebelião.",
+            "A felicidade só é real quando compartilhada.",
+            "Não há nada como o regresso a um lugar que está igual para descobrir o quanto a gente mudou.",
+            "Somos feitos de carne, mas temos de viver como se fôssemos de ferro.",
+            "A leitura é uma viagem sem fim."
+        ];
+        let currentWord = "";
+        let typedWord = "";
+        let score = 0;
+        let timeLeft = 60;
+        let gameState = "modeSelection";
+        let mode = "words";
+        let wordIndex = 0;
+        let textWords = [];
+
+        function setup() {
+            noCanvas();
+            document.getElementById("words-mode").addEventListener("click", () => startGame("words"));
+            document.getElementById("text-mode").addEventListener("click", () => startGame("text"));
+            document.getElementById("restart").addEventListener("click", resetGame);
+        }
+
+        function draw() {
+            if (gameState === "playing" && frameCount % 60 === 0) {
+                timeLeft--;
+                document.getElementById("time").textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }
+        }
+
+        function startGame(selectedMode) {
+            mode = selectedMode;
+            gameState = "playing";
+            document.getElementById("mode-selection").classList.add("hidden");
+            document.getElementById("game-screen").classList.remove("hidden");
+            if (mode === "text") {
+                fetchBookExcerpt().then(excerpt => {
+                    textWords = excerpt.split(" ").filter(word => word.length > 0);
+                    selectNewWord();
+                }).catch(() => {
+                    textWords = bookExcerpts[Math.floor(Math.random() * bookExcerpts.length)].split(" ").filter(word => word.length > 0);
+                    selectNewWord();
+                });
+            } else {
+                selectNewWord();
+            }
+            updateDisplay();
+        }
+
+        function fetchBookExcerpt() {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve(bookExcerpts[Math.floor(Math.random() * bookExcerpts.length)]);
+                }, 1000);
+            });
+        }
+
+        function selectNewWord() {
+            if (mode === "text") {
+                if (wordIndex >= textWords.length) {
+                    wordIndex = 0;
+                    fetchBookExcerpt().then(excerpt => {
+                        textWords = excerpt.split(" ").filter(word => word.length > 0);
+                        currentWord = textWords[wordIndex++];
+                    });
+                } else {
+                    currentWord = textWords[wordIndex++];
+                }
+            } else {
+                currentWord = words[Math.floor(Math.random() * words.length)];
+            }
+            updateDisplay();
+        }
+
+        function keyTyped() {
+            if (gameState !== "playing") return;
+
+            if (key === " " || keyCode === 13) {
+                const wordElement = document.getElementById("current-word");
+                if (typedWord === currentWord) {
+                    score += 10;
+                    wordElement.classList.add("correct");
+                    setTimeout(() => wordElement.classList.remove("correct"), 300);
+                    selectNewWord();
+                    typedWord = "";
+                } else {
+                    score = Math.max(0, score - 5);
+                    wordElement.classList.add("incorrect");
+                    setTimeout(() => wordElement.classList.remove("incorrect"), 300);
+                    typedWord = "";
+                }
+                updateDisplay();
+            } else if (keyCode !== BACKSPACE) {
+                typedWord += key;
+                updateDisplay();
+            }
+        }
+
+        function keyPressed() {
+            if (keyCode === BACKSPACE && typedWord.length > 0) {
+                typedWord = typedWord.slice(0, -1);
+                updateDisplay();
+            }
+        }
+
+        function updateDisplay() {
+            document.getElementById("score").textContent = score;
+            document.getElementById("current-word").textContent = currentWord;
+            document.getElementById("typed-word").textContent = typedWord;
+        }
+
+        function endGame() {
+            gameState = "gameOver";
+            document.getElementById("game-over").classList.remove("hidden");
+            document.getElementById("final-score").textContent = score;
+        }
+
+        function resetGame() {
+            score = 0;
+            timeLeft = 60;
+            typedWord = "";
+            wordIndex = 0;
+            gameState = "modeSelection";
+            document.getElementById("mode-selection").classList.remove("hidden");
+            document.getElementById("game-screen").classList.add("hidden");
+            document.getElementById("game-over").classList.add("hidden");
+            updateDisplay();
+        }
+    </script>
 </body>
 </html>

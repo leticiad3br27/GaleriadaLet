@@ -3,30 +3,330 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo 4</title>
-    <link rel="stylesheet" href="../css/jogo4.css">
+    <title>Jogo de Xadrez</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a2a44, #3a506b);
+            font-family: 'Arial', sans-serif;
+            color: #fff;
+        }
+        .game-container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(8, 60px);
+            grid-template-rows: repeat(8, 60px);
+            border: 4px solid #2c3e50;
+            margin: 20px auto;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        }
+        .square {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+        }
+        .square:hover {
+            transform: scale(1.05);
+        }
+        .white {
+            background: #f0d9b5;
+        }
+        .black {
+            background: #b58863;
+        }
+        .selected {
+            background: #aaffaa !important;
+        }
+        .valid-move {
+            background: #ffffaa !important;
+        }
+        .controls {
+            margin: 10px 0;
+        }
+        button, select {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 25px;
+            background: #3498db;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+        button:hover, select:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        #status {
+            font-size: 18px;
+            margin: 10px 0;
+            color: #ecf0f1;
+        }
+        @media (max-width: 600px) {
+            .board {
+                grid-template-columns: repeat(8, 40px);
+                grid-template-rows: repeat(8, 40px);
+            }
+            .square {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            button, select {
+                padding: 8px 15px;
+                font-size: 14px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Detalhes do Jogo 4</h1>
-    </header>
-    <main>
-        <section>
-            <h2>Descrição</h2>
-            <p>Aqui você pode adicionar uma descrição detalhada do Jogo 4.</p>
-        </section>
-        <section>
-            <h2>Imagens</h2>
-            <img src="../imagens/jogo4-thumbnail.jpg" alt="Miniatura do Jogo 4">
-        </section>
-        <section>
-            <h2>Links</h2>
-            <a href="https://link-para-o-jogo4.com">Jogar Jogo 4</a>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2023 Galeria de Jogos</p>
-    </footer>
-    <script src="../js/jogo4.js"></script>
+    <div class="game-container">
+        <h1>Jogo de Xadrez</h1>
+        <div class="controls">
+            <select id="playerMode">
+                <option value="2">2 Jogadores</option>
+                <option value="1">1 Jogador (vs IA)</option>
+            </select>
+            <button onclick="resetGame()">Reiniciar Jogo</button>
+        </div>
+        <div id="status">Vez das Brancas</div>
+        <div id="board" class="board"></div>
+    </div>
+    <script>
+        const boardElement = document.getElementById('board');
+        const statusElement = document.getElementById('status');
+        const playerModeElement = document.getElementById('playerMode');
+        let board = [];
+        let currentTurn = 'white';
+        let selectedSquare = null;
+        let playerMode = '2';
+        const pieces = {
+            'white': { 'king': '♔', 'queen': '♕', 'rook': '♖', 'bishop': '♗', 'knight': '♘', 'pawn': '♙' },
+            'black': { 'king': '♚', 'queen': '♛', 'rook': '♜', 'bishop': '♝', 'knight': '♞', 'pawn': '♟' }
+        };
+
+        function initializeBoard() {
+            board = [
+                ['br', 'bn', 'bb', 'bq', 'bk', 'bb', 'bn', 'br'],
+                ['bp', 'bp', 'bp', 'bp', 'bp', 'bp', 'bp', 'bp'],
+                ['', '', '', '', '', '', '', ''],
+                ['', '', '', '', '', '', '', ''],
+                ['', '', '', '', '', '', '', ''],
+                ['', '', '', '', '', '', '', ''],
+                ['wp', 'wp', 'wp', 'wp', 'wp', 'wp', 'wp', 'wp'],
+                ['wr', 'wn', 'wb', 'wq', 'wk', 'wb', 'wn', 'wr']
+            ];
+            currentTurn = 'white';
+            selectedSquare = null;
+            renderBoard();
+            updateStatus();
+        }
+
+        function renderBoard() {
+            boardElement.innerHTML = '';
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const square = document.createElement('div');
+                    square.classList.add('square', (row + col) % 2 === 0 ? 'white' : 'black');
+                    const piece = board[row][col];
+                    if (piece) {
+                        const color = piece[0] === 'w' ? 'white' : 'black';
+                        const type = piece[1] === 'p' ? 'pawn' : piece[1] === 'r' ? 'rook' : piece[1] === 'n' ? 'knight' : piece[1] === 'b' ? 'bishop' : piece[1] === 'q' ? 'queen' : 'king';
+                        square.innerHTML = pieces[color][type];
+                    }
+                    square.dataset.row = row;
+                    square.dataset.col = col;
+                    square.addEventListener('click', handleSquareClick);
+                    boardElement.appendChild(square);
+                }
+            }
+        }
+
+        function handleSquareClick(event) {
+            const row = parseInt(event.target.dataset.row);
+            const col = parseInt(event.target.dataset.col);
+            if (selectedSquare) {
+                const fromRow = selectedSquare.row;
+                const fromCol = selectedSquare.col;
+                if (isValidMove(fromRow, fromCol, row, col)) {
+                    movePiece(fromRow, fromCol, row, col);
+                    selectedSquare = null;
+                    clearHighlights();
+                    if (playerMode === '1' && currentTurn === 'black') {
+                        setTimeout(makeAIMove, 500);
+                    }
+                } else {
+                    clearHighlights();
+                    selectedSquare = null;
+                    highlightSquare(row, col);
+                    if (board[row][col] && board[row][col][0] === currentTurn[0]) {
+                        selectedSquare = { row, col };
+                        highlightValidMoves(row, col);
+                    }
+                }
+            } else {
+                if (board[row][col] && board[row][col][0] === currentTurn[0]) {
+                    selectedSquare = { row, col };
+                    highlightSquare(row, col);
+                    highlightValidMoves(row, col);
+                }
+            }
+        }
+
+        function isValidMove(fromRow, fromCol, toRow, toCol) {
+            const piece = board[fromRow][fromCol];
+            if (!piece) return false;
+            const pieceType = piece[1];
+            const color = piece[0];
+            const target = board[toRow][toCol];
+            if (target && target[0] === color) return false;
+
+            const rowDiff = toRow - fromRow;
+            const colDiff = toCol - fromCol;
+
+            switch (pieceType) {
+                case 'p': // Pawn
+                    const direction = color === 'w' ? -1 : 1;
+                    if (colDiff === 0 && !target) {
+                        if (rowDiff === direction) return true;
+                        if ((color === 'w' && fromRow === 6) || (color === 'b' && fromRow === 1)) {
+                            if (rowDiff === 2 * direction && !board[fromRow + direction][fromCol]) return true;
+                        }
+                    } else if (Math.abs(colDiff) === 1 && rowDiff === direction && target) {
+                        return true;
+                    }
+                    return false;
+                case 'r': // Rook
+                    return isClearPath(fromRow, fromCol, toRow, toCol, rowDiff, colDiff, ['row', 'col']);
+                case 'b': // Bishop
+                    return isClearPath(fromRow, fromCol, toRow, toCol, rowDiff, colDiff, ['diagonal']);
+                case 'q': // Queen
+                    return isClearPath(fromRow, fromCol, toRow, toCol, rowDiff, colDiff, ['row', 'col', 'diagonal']);
+                case 'k': // King
+                    return Math.abs(rowDiff) <= 1 && Math.abs(colDiff) <= 1;
+                case 'n': // Knight
+                    return (Math.abs(rowDiff) === 2 && Math.abs(colDiff) === 1) || (Math.abs(rowDiff) === 1 && Math.abs(colDiff) === 2);
+                default:
+                    return false;
+            }
+        }
+
+        function isClearPath(fromRow, fromCol, toRow, toCol, rowDiff, colDiff, allowedDirections) {
+            if (allowedDirections.includes('row') && rowDiff === 0) {
+                const step = colDiff > 0 ? 1 : -1;
+                for (let col = fromCol + step; col !== toCol; col += step) {
+                    if (board[fromRow][col]) return false;
+                }
+                return true;
+            }
+            if (allowedDirections.includes('col') && colDiff === 0) {
+                const step = rowDiff > 0 ? 1 : -1;
+                for (let row = fromRow + step; row !== toRow; row += step) {
+                    if (board[row][fromCol]) return false;
+                }
+                return true;
+            }
+            if (allowedDirections.includes('diagonal') && Math.abs(rowDiff) === Math.abs(colDiff)) {
+                const rowStep = rowDiff > 0 ? 1 : -1;
+                const colStep = colDiff > 0 ? 1 : -1;
+                for (let i = 1; i < Math.abs(rowDiff); i++) {
+                    if (board[fromRow + i * rowStep][fromCol + i * colStep]) return false;
+                }
+                return true;
+            }
+            return false;
+        }
+
+        function movePiece(fromRow, fromCol, toRow, toCol) {
+            board[toRow][toCol] = board[fromRow][fromCol];
+            board[fromRow][fromCol] = '';
+            currentTurn = currentTurn === 'white' ? 'black' : 'white';
+            renderBoard();
+            updateStatus();
+        }
+
+        function highlightSquare(row, col) {
+            const square = boardElement.children[row * 8 + col];
+            square.classList.add('selected');
+        }
+
+        function highlightValidMoves(row, col) {
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    if (isValidMove(row, col, r, c)) {
+                        const square = boardElement.children[r * 8 + c];
+                        square.classList.add('valid-move');
+                    }
+                }
+            }
+        }
+
+        function clearHighlights() {
+            document.querySelectorAll('.square').forEach(square => {
+                square.classList.remove('selected', 'valid-move');
+            });
+        }
+
+        function updateStatus() {
+            statusElement.textContent = `Vez das ${currentTurn === 'white' ? 'Brancas' : 'Pretas'}`;
+        }
+
+        function makeAIMove() {
+            const moves = [];
+            for (let fromRow = 0; fromRow < 8; fromRow++) {
+                for (let fromCol = 0; fromCol < 8; fromCol++) {
+                    if (board[fromRow][fromCol] && board[fromRow][fromCol][0] === 'b') {
+                        for (let toRow = 0; toRow < 8; toRow++) {
+                            for (let toCol = 0; toCol < 8; toCol++) {
+                                if (isValidMove(fromRow, fromCol, toRow, toCol)) {
+                                    moves.push({ fromRow, fromCol, toRow, toCol });
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (moves.length > 0) {
+                const move = moves[Math.floor(Math.random() * moves.length)];
+                movePiece(move.fromRow, move.fromCol, move.toRow, move.toCol);
+            }
+        }
+
+        function resetGame() {
+            playerMode = playerModeElement.value;
+            initializeBoard();
+            if (playerMode === '1' && currentTurn === 'black') {
+                setTimeout(makeAIMove, 500);
+            }
+        }
+
+        playerModeElement.addEventListener('change', resetGame);
+        initializeBoard();
+    </script>
 </body>
 </html>

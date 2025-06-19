@@ -1,62 +1,652 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>Jogo da Forca - Galeria de Jogos</title>
-    <link rel="stylesheet" href="../css/hangman.css"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Forca</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: var(--dark-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+
+        .game-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            padding: 30px;
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 20px;
+        }
+
+        .mode-selection {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .mode-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .mode-btn.active {
+            background-color: var(--secondary-color);
+        }
+
+        .game-area {
+            display: none;
+        }
+
+        .game-area.active {
+            display: block;
+        }
+
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        canvas {
+            border: 2px solid var(--dark-color);
+            border-radius: 5px;
+        }
+
+        .word-display {
+            font-size: 2rem;
+            letter-spacing: 10px;
+            text-align: center;
+            margin: 20px 0;
+            min-height: 50px;
+            font-family: monospace;
+        }
+
+        .keyboard {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .keyboard-btn {
+            padding: 10px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 5px;
+            background-color: var(--light-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .keyboard-btn:hover {
+            background-color: #d5dbdb;
+        }
+
+        .keyboard-btn.used {
+            background-color: #bdc3c7;
+            color: #7f8c8d;
+            cursor: not-allowed;
+        }
+
+        .keyboard-btn.correct {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .keyboard-btn.wrong {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .action-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .message {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 1.2rem;
+            min-height: 30px;
+            color: var(--danger-color);
+        }
+
+        .success {
+            color: var(--secondary-color);
+        }
+
+        .player-turn {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .hangman-parts {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .keyboard {
+                grid-template-columns: repeat(7, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .keyboard {
+                grid-template-columns: repeat(5, 1fr);
+            }
+            
+            .game-container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <header>
         <h1>Jogo da Forca</h1>
+        <p>Adivinhe a palavra antes que o boneco seja enforcado!</p>
     </header>
-    <main>
-        <section>
-            <h2>Escolha o Modo de Jogo</h2>
-            <div class="game-mode">
-                <button id="one-player">1 Jogador</button>
-                <button id="two-players">2 Jogadores</button>
-            </div>
-        </section>
 
-        <section id="word-input-section" class="hidden">
-            <h2>Jogador 1: Digite a palavra para o jogador 2 adivinhar</h2>
-            <input type="password" id="input-word" aria-label="Palavra secreta"/>
-            <button id="submit-word">Enviar Palavra</button>
-            <p id="word-input-error" class="error-message hidden" aria-live="assertive"></p>
-        </section>
+    <div class="game-container">
+        <div class="mode-selection">
+            <button class="mode-btn" id="singlePlayerBtn">Um Jogador</button>
+            <button class="mode-btn" id="twoPlayersBtn">Dois Jogadores</button>
+        </div>
 
-        <section id="game-section" class="hidden">
-            <h2>Jogo da Forca</h2>
-            <div id="hangman-container" aria-label="Desenho da forca">
-                <svg id="hangman" height="250" width="200" aria-hidden="true" role="img">
-                    <line x1="10" y1="230" x2="190" y2="230" stroke="#333" stroke-width="4"/>
-                    <line x1="50" y1="230" x2="50" y2="20" stroke="#333" stroke-width="4"/>
-                    <line x1="50" y1="20" x2="140" y2="20" stroke="#333" stroke-width="4"/>
-                    <line id="rope" x1="140" y1="20" x2="140" y2="50" stroke="#333" stroke-width="4" visibility="hidden"/>
-                    <circle id="head" cx="140" cy="70" r="20" stroke="#333" stroke-width="4" fill="none" visibility="hidden"/>
-                    <line id="body" x1="140" y1="90" x2="140" y2="150" stroke="#333" stroke-width="4" visibility="hidden"/>
-                    <line id="left-arm" x1="140" y1="110" x2="110" y2="130" stroke="#333" stroke-width="4" visibility="hidden"/>
-                    <line id="right-arm" x1="140" y1="110" x2="170" y2="130" stroke="#333" stroke-width="4" visibility="hidden"/>
-                    <line id="left-leg" x1="140" y1="150" x2="110" y2="190" stroke="#333" stroke-width="4" visibility="hidden"/>
-                    <line id="right-leg" x1="140" y1="150" x2="170" y2="190" stroke="#333" stroke-width="4" visibility="hidden"/>
-                </svg>
+        <div class="game-area" id="singlePlayerArea">
+            <div class="canvas-container">
+                <canvas id="hangmanCanvas" width="300" height="300"></canvas>
             </div>
-            <div id="word-display" aria-live="polite" aria-label="Palavra a adivinhar" role="textbox"></div>
-            <div id="letters-guessed" aria-label="Letras chutadas"></div>
-            <p id="message" aria-live="assertive"></p>
-            <div id="input-area">
-                <label for="letter-input">Digite uma letra:</label>
-                <input type="text" id="letter-input" maxlength="1" pattern="[a-zA-Z]" autocomplete="off" aria-label="Letra para adivinhar"/>
-                <button id="guess-letter">Chutar</button>
+            <div class="player-turn" id="singlePlayerTurn"></div>
+            <div class="word-display" id="wordDisplay"></div>
+            <div class="message" id="message"></div>
+            <div class="keyboard" id="keyboard"></div>
+            <button class="action-btn" id="newGameBtn">Novo Jogo</button>
+        </div>
+
+        <div class="game-area" id="twoPlayersArea">
+            <div class="input-section" id="wordInputSection">
+                <div class="input-group">
+                    <label for="secretWord">Jogador 1: Digite a palavra secreta</label>
+                    <input type="text" id="secretWord" placeholder="Digite a palavra (sem espaços)">
+                </div>
+                <button class="action-btn" id="startGameBtn">Iniciar Jogo</button>
             </div>
-            <button id="restart" class="hidden">Reiniciar Jogo</button>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2023 Galeria de Jogos. Todos os direitos reservados.</p>
-    </footer>
-    <script src="hangman.js"></script>
+
+            <div class="game-play" id="gamePlaySection" style="display: none;">
+                <div class="canvas-container">
+                    <canvas id="hangmanCanvas2" width="300" height="300"></canvas>
+                </div>
+                <div class="player-turn" id="playerTurn"></div>
+                <div class="word-display" id="wordDisplay2"></div>
+                <div class="message" id="message2"></div>
+                <div class="keyboard" id="keyboard2"></div>
+                <button class="action-btn" id="newGameBtn2">Novo Jogo</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        
+        const wordList = [
+            "COMPUTADOR", "PROGRAMACAO", "ALGORITMO", "INTERNET", "TECNOLOGIA",
+            "DESENVOLVIMENTO", "JAVASCRIPT", "FRAMEWORK", "BANCO DE DADOS", "FUNCIONAL",
+            "VARIÁVEL", "FUNÇÃO", "OBJETO", "ARRAY", "CONDICIONAL",
+            "REPETIÇÃO", "EVENTO", "CLASSE", "HERANÇA", "ENCAPSULAMENTO",
+            "ABSTRAÇÃO", "POLIMORFISMO", "INTERFACE", "MODULARIZAÇÃO", "REFATORAÇÃO",
+            "DEBUG", "COMPILADOR", "INTERPRETADOR", "SINTAXE", "SEMÂNTICA",
+            "PARADIGMA", "PROCEDURAL", "ORIENTADO A OBJETOS", "FUNCIONAL", "LÓGICO",
+            "SCRIPT", "BACKEND", "FRONTEND", "FULLSTACK", "API",
+            "JSON", "XML", "HTML", "CSS", "REACT",
+            "ANGULAR", "VUE", "NODE", "EXPRESS", "MONGODB",
+            "MYSQL", "POSTGRESQL", "SQL", "NOSQL", "GIT",
+            "GITHUB", "DEPLOY", "HOSPEDAGEM", "DOMÍNIO", "SERVIDOR",
+            "CLOUD", "AWS", "AZURE", "GOOGLE CLOUD", "DOCKER",
+            "KUBERNETES", "MICROSSERVIÇOS", "ARQUITETURA", "DESIGN PATTERN", "SINGLETON",
+            "OBSERVER", "FACTORY", "DECORATOR", "STRATEGY", "ADAPTER",
+            "PROXY", "ITERATOR", "STATE", "TEMPLATE METHOD", "VISITOR",
+            "MIDDLEWARE", "ROTEAMENTO", "AUTENTICAÇÃO", "AUTORIZAÇÃO", "JWT",
+            "OAUTH", "SESSION", "COOKIE", "CACHE", "REDIS",
+            "ELASTICSEARCH", "LOGGING", "MONITORAMENTO", "METRICA", "ALERTA",
+            "CI/CD", "PIPELINE", "TESTE", "UNITÁRIO", "INTEGRAÇÃO",
+            "FUNCIONAL", "ACEITAÇÃO", "PERFORMANCE", "CARGA", "STRESS",
+            "SEGURANÇA", "VULNERABILIDADE", "SQL INJECTION", "XSS", "CSRF",
+            "DDOS", "FIREWALL", "HTTPS", "SSL", "TLS"
+        ];
+
+        // Elementos do DOM
+        const singlePlayerBtn = document.getElementById('singlePlayerBtn');
+        const twoPlayersBtn = document.getElementById('twoPlayersBtn');
+        const singlePlayerArea = document.getElementById('singlePlayerArea');
+        const twoPlayersArea = document.getElementById('twoPlayersArea');
+        const wordInputSection = document.getElementById('wordInputSection');
+        const gamePlaySection = document.getElementById('gamePlaySection');
+        const secretWordInput = document.getElementById('secretWord');
+        const startGameBtn = document.getElementById('startGameBtn');
+        const newGameBtn = document.getElementById('newGameBtn');
+        const newGameBtn2 = document.getElementById('newGameBtn2');
+        const wordDisplay = document.getElementById('wordDisplay');
+        const wordDisplay2 = document.getElementById('wordDisplay2');
+        const message = document.getElementById('message');
+        const message2 = document.getElementById('message2');
+        const keyboard = document.getElementById('keyboard');
+        const keyboard2 = document.getElementById('keyboard2');
+        const singlePlayerTurn = document.getElementById('singlePlayerTurn');
+        const playerTurn = document.getElementById('playerTurn');
+
+        // Configuração dos canvases
+        const canvas = document.getElementById('hangmanCanvas');
+        const ctx = canvas.getContext('2d');
+        const canvas2 = document.getElementById('hangmanCanvas2');
+        const ctx2 = canvas2.getContext('2d');
+
+        // Variáveis do jogo
+        let secretWord = '';
+        let guessedLetters = [];
+        let wrongGuesses = 0;
+        let gameOver = false;
+        let gameMode = '';
+        let currentPlayer = 1;
+
+        // Inicialização
+        setupKeyboard();
+        setupKeyboard2();
+        drawHangmanBase(ctx);
+        drawHangmanBase(ctx2);
+
+        // Event listeners
+        singlePlayerBtn.addEventListener('click', () => {
+            gameMode = 'single';
+            singlePlayerBtn.classList.add('active');
+            twoPlayersBtn.classList.remove('active');
+            singlePlayerArea.classList.add('active');
+            twoPlayersArea.classList.remove('active');
+            startNewGame();
+        });
+
+        twoPlayersBtn.addEventListener('click', () => {
+            gameMode = 'two';
+            twoPlayersBtn.classList.add('active');
+            singlePlayerBtn.classList.remove('active');
+            twoPlayersArea.classList.add('active');
+            singlePlayerArea.classList.remove('active');
+            wordInputSection.style.display = 'block';
+            gamePlaySection.style.display = 'none';
+        });
+
+        startGameBtn.addEventListener('click', () => {
+            const word = secretWordInput.value.trim().toUpperCase();
+            if (word.length < 2) {
+                alert('Por favor, digite uma palavra com pelo menos 2 letras!');
+                return;
+            }
+            
+            secretWord = word;
+            secretWordInput.value = '';
+            wordInputSection.style.display = 'none';
+            gamePlaySection.style.display = 'block';
+            startNewGameTwoPlayers();
+        });
+
+        newGameBtn.addEventListener('click', startNewGame);
+        newGameBtn2.addEventListener('click', () => {
+            wordInputSection.style.display = 'block';
+            gamePlaySection.style.display = 'none';
+        });
+
+        // Funções do jogo
+        function startNewGame() {
+            // Escolhe uma palavra aleatória para o modo single player
+            if (gameMode === 'single') {
+                secretWord = wordList[Math.floor(Math.random() * wordList.length)];
+            }
+            
+            guessedLetters = [];
+            wrongGuesses = 0;
+            gameOver = false;
+            
+            // Limpa o canvas e desenha a base
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawHangmanBase(ctx);
+            
+            // Atualiza a exibição da palavra
+            updateWordDisplay();
+            
+            // Limpa mensagens
+            message.textContent = '';
+            message.className = 'message';
+            
+            // Reinicia o teclado
+            resetKeyboard();
+            
+            // Atualiza o turno do jogador
+            singlePlayerTurn.textContent = 'Tente adivinhar a palavra secreta!';
+        }
+
+        function startNewGameTwoPlayers() {
+            guessedLetters = [];
+            wrongGuesses = 0;
+            gameOver = false;
+            
+            // Limpa o canvas e desenha a base
+            ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
+            drawHangmanBase(ctx2);
+            
+            // Atualiza a exibição da palavra
+            updateWordDisplayTwoPlayers();
+            
+            // Limpa mensagens
+            message2.textContent = '';
+            message2.className = 'message';
+            
+            // Reinicia o teclado
+            resetKeyboard2();
+            
+            // Atualiza o turno do jogador
+            playerTurn.textContent = 'Jogador 2: Tente adivinhar a palavra secreta!';
+            currentPlayer = 2;
+        }
+
+        function updateWordDisplay() {
+            let display = '';
+            for (const letter of secretWord) {
+                if (guessedLetters.includes(letter) || letter === ' ') {
+                    display += letter + ' ';
+                } else if (letter === '-') {
+                    display += '- ';
+                } else {
+                    display += '_ ';
+                }
+            }
+            wordDisplay.textContent = display.trim();
+            
+            // Verifica se o jogador ganhou
+            if (!display.includes('_')) {
+                gameOver = true;
+                message.textContent = 'Parabéns! Você acertou a palavra!';
+                message.className = 'message success';
+            }
+        }
+
+        function updateWordDisplayTwoPlayers() {
+            let display = '';
+            for (const letter of secretWord) {
+                if (guessedLetters.includes(letter) || letter === ' ') {
+                    display += letter + ' ';
+                } else if (letter === '-') {
+                    display += '- ';
+                } else {
+                    display += '_ ';
+                }
+            }
+            wordDisplay2.textContent = display.trim();
+            
+            // Verifica se o jogador ganhou
+            if (!display.includes('_')) {
+                gameOver = true;
+                message2.textContent = 'Parabéns Jogador 2! Você acertou a palavra!';
+                message2.className = 'message success';
+            }
+        }
+
+        function setupKeyboard() {
+            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+            keyboard.innerHTML = '';
+            
+            letters.forEach(letter => {
+                const button = document.createElement('button');
+                button.textContent = letter;
+                button.className = 'keyboard-btn';
+                button.addEventListener('click', () => handleGuess(letter, button));
+                keyboard.appendChild(button);
+            });
+        }
+
+        function setupKeyboard2() {
+            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+            keyboard2.innerHTML = '';
+            
+            letters.forEach(letter => {
+                const button = document.createElement('button');
+                button.textContent = letter;
+                button.className = 'keyboard-btn';
+                button.addEventListener('click', () => handleGuessTwoPlayers(letter, button));
+                keyboard2.appendChild(button);
+            });
+        }
+
+        function resetKeyboard() {
+            const buttons = keyboard.querySelectorAll('.keyboard-btn');
+            buttons.forEach(button => {
+                button.className = 'keyboard-btn';
+                button.disabled = false;
+            });
+        }
+
+        function resetKeyboard2() {
+            const buttons = keyboard2.querySelectorAll('.keyboard-btn');
+            buttons.forEach(button => {
+                button.className = 'keyboard-btn';
+                button.disabled = false;
+            });
+        }
+
+        function handleGuess(letter, button) {
+            if (gameOver || guessedLetters.includes(letter)) return;
+            
+            guessedLetters.push(letter);
+            button.disabled = true;
+            
+            if (secretWord.includes(letter)) {
+                button.classList.add('correct');
+                updateWordDisplay();
+            } else {
+                button.classList.add('wrong');
+                wrongGuesses++;
+                drawHangmanPart(wrongGuesses, ctx);
+                
+                if (wrongGuesses >= 6) {
+                    gameOver = true;
+                    message.textContent = `Game Over! A palavra era: ${secretWord}`;
+                }
+            }
+        }
+
+        function handleGuessTwoPlayers(letter, button) {
+            if (gameOver || guessedLetters.includes(letter)) return;
+            
+            guessedLetters.push(letter);
+            button.disabled = true;
+            
+            if (secretWord.includes(letter)) {
+                button.classList.add('correct');
+                updateWordDisplayTwoPlayers();
+            } else {
+                button.classList.add('wrong');
+                wrongGuesses++;
+                drawHangmanPart(wrongGuesses, ctx2);
+                
+                if (wrongGuesses >= 6) {
+                    gameOver = true;
+                    message2.textContent = `Game Over! A palavra era: ${secretWord}`;
+                }
+            }
+        }
+
+        function drawHangmanBase(context) {
+            context.strokeStyle = '#000';
+            context.lineWidth = 2;
+            
+            // Base
+            context.beginPath();
+            context.moveTo(50, 280);
+            context.lineTo(150, 280);
+            context.stroke();
+            
+            // Poste
+            context.beginPath();
+            context.moveTo(100, 280);
+            context.lineTo(100, 50);
+            context.stroke();
+            
+            // Topo
+            context.beginPath();
+            context.moveTo(100, 50);
+            context.lineTo(200, 50);
+            context.stroke();
+            
+            // Corda
+            context.beginPath();
+            context.moveTo(200, 50);
+            context.lineTo(200, 80);
+            context.stroke();
+        }
+
+        function drawHangmanPart(part, context) {
+            context.strokeStyle = '#000';
+            context.lineWidth = 2;
+            
+            switch (part) {
+                case 1: // Cabeça
+                    context.beginPath();
+                    context.arc(200, 100, 20, 0, Math.PI * 2);
+                    context.stroke();
+                    break;
+                case 2: // Corpo
+                    context.beginPath();
+                    context.moveTo(200, 120);
+                    context.lineTo(200, 180);
+                    context.stroke();
+                    break;
+                case 3: // Braço esquerdo
+                    context.beginPath();
+                    context.moveTo(200, 140);
+                    context.lineTo(170, 150);
+                    context.stroke();
+                    break;
+                case 4: // Braço direito
+                    context.beginPath();
+                    context.moveTo(200, 140);
+                    context.lineTo(230, 150);
+                    context.stroke();
+                    break;
+                case 5: // Perna esquerda
+                    context.beginPath();
+                    context.moveTo(200, 180);
+                    context.lineTo(170, 210);
+                    context.stroke();
+                    break;
+                case 6: // Perna direita
+                    context.beginPath();
+                    context.moveTo(200, 180);
+                    context.lineTo(230, 210);
+                    context.stroke();
+                    
+                    // Olhos tristes
+                    context.beginPath();
+                    context.arc(193, 95, 2, 0, Math.PI * 2);
+                    context.stroke();
+                    context.beginPath();
+                    context.arc(207, 95, 2, 0, Math.PI * 2);
+                    context.stroke();
+                    
+                    // Boca triste
+                    context.beginPath();
+                    context.arc(200, 105, 10, 0.1 * Math.PI, 0.9 * Math.PI);
+                    context.stroke();
+                    break;
+            }
+        }
+
+        // Inicia o jogo no modo single player por padrão
+        singlePlayerBtn.click();
+    </script>
 </body>
 </html>
-

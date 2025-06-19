@@ -1,33 +1,332 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo 6</title>
-    <link rel="stylesheet" href="../css/jogo6.css">
+    <title>Jogo de Desenho - Gartic</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.2/p5.min.js"></script>
 </head>
-<body>
-    <header>
-        <h1>Detalhes do Jogo 6</h1>
-    </header>
-    <main>
-        <section>
-            <h2>Descrição</h2>
-            <p>Aqui você pode adicionar uma descrição detalhada do Jogo 6.</p>
-        </section>
-        <section>
-            <h2>Imagens</h2>
-            <img src="../imagens/jogo6-thumbnail.jpg" alt="Thumbnail do Jogo 6">
-            <p>Adicione mais imagens relacionadas ao Jogo 6 aqui.</p>
-        </section>
-        <section>
-            <h2>Links</h2>
-            <p>Links úteis relacionados ao Jogo 6 podem ser adicionados aqui.</p>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2023 Galeria de Jogos</p>
-    </footer>
-    <script src="../js/jogo6.js"></script>
+<body class="bg-gray-100 min-h-screen">
+    <div id="telaInicial" class="flex items-center justify-center min-h-screen">
+        <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+            <h1 class="text-3xl font-bold text-center mb-6 text-blue-600">Jogo de Desenho - Gartic</h1>
+            <div class="flex gap-2 mb-4">
+                <input 
+                    type="text" 
+                    id="nomeJogador" 
+                    placeholder="Digite o nome do jogador" 
+                    class="flex-grow p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                <button 
+                    onclick="adicionarJogador()" 
+                    class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+                >
+                    Adicionar
+                </button>
+            </div>
+            <ul id="listaJogadores" class="space-y-2 mb-4">
+                <!-- Lista de jogadores será adicionada aqui -->
+            </ul>
+            <p id="contagem" class="text-center text-gray-600 mb-4">Total: 0 jogadores</p>
+            <button 
+                onclick="iniciarJogo()" 
+                class="w-full bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
+            >
+                Iniciar Jogo
+            </button>
+        </div>
+    </div>
+
+    <div id="telaPalavra" class="hidden flex items-center justify-center min-h-screen">
+        <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md text-center">
+            <h2 class="text-2xl font-bold mb-4 text-blue-600">Escolha uma Palavra</h2>
+            <div id="opcoesPalavras" class="grid grid-cols-2 gap-2 mb-4">
+                <!-- Opções de palavras serão adicionadas aqui -->
+            </div>
+            <p id="jogadorAtual" class="text-gray-600 mb-4"></p>
+        </div>
+    </div>
+
+    <div id="telaDesenho" class="hidden flex flex-col items-center p-4">
+        <h2 id="jogadorDesenhando" class="text-2xl font-bold text-blue-600 mb-4"></h2>
+        <div class="flex flex-wrap gap-4 mb-4 justify-center">
+            <select id="ferramenta" class="p-2 border rounded-lg">
+                <option value="lapis">Lápis</option>
+                <option value="pincel">Pincel</option>
+                <option value="spray">Aerógrafo (Spray)</option>
+                <option value="borracha">Borracha</option>
+                <option value="preenchimento">Preenchimento</option>
+                <option value="linha">Linha</option>
+                <option value="retangulo">Retângulo</option>
+                <option value="circulo">Círculo</option>
+            </select>
+            <select id="pincelTamanho" class="p-2 border rounded-lg">
+                <option value="2">Muito Fino (2px)</option>
+                <option value="5">Fino (5px)</option>
+                <option value="10">Médio (10px)</option>
+                <option value="20">Grosso (20px)</option>
+                <option value="40">Muito Grosso (40px)</option>
+            </select>
+            <div class="flex gap-2">
+                <input type="color" id="corPincel" value="#000000" class="p-1 border rounded-lg">
+                <div class="flex gap-1">
+                    <button onclick="selecionarCor('#000000')" class="w-8 h-8 bg-black border"></button>
+                    <button onclick="selecionarCor('#FF0000')" class="w-8 h-8 bg-red-500 border"></button>
+                    <button onclick="selecionarCor('#00FF00')" class="w-8 h-8 bg-green-500 border"></button>
+                    <button onclick="selecionarCor('#0000FF')" class="w-8 h-8 bg-blue-500 border"></button>
+                    <button onclick="selecionarCor('#FFFF00')" class="w-8 h-8 bg-yellow-500 border"></button>
+                </div>
+            </div>
+            <button 
+                onclick="limparCanvas()" 
+                class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
+            >
+                Limpar
+            </button>
+            <button 
+                onclick="finalizarDesenho()" 
+                class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
+            >
+                Finalizar
+            </button>
+        </div>
+        <div id="canvasContainer" class="border border-gray-300"></div>
+        <div id="chatChutes" class="w-full max-w-md mt-4">
+            <h3 class="text-lg font-bold mb-2">Chutes dos Jogadores</h3>
+            <ul id="listaChutes" class="space-y-2 mb-4"></ul>
+            <div class="flex gap-2">
+                <input 
+                    type="text" 
+                    id="chuteInput" 
+                    placeholder="Digite seu chute" 
+                    class="flex-grow p-2 border border-gray-300 rounded-lg"
+                >
+                <button 
+                    onclick="enviarChute()" 
+                    class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
+                >
+                    Chutar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let jogadores = [];
+        let palavras =            [ "Limpeza", "Vassoura", "Rodo", "Pá", "Balde", "Pano", "Sabão", "Detergente", "Desinfetante", "Aspirador",
+            "Segurança", "Cadeado", "Alarme", "Câmera", "Seguro", "Polícia", "Bombeiro", "Emergência", "Capacete", "Cinto de segurança",
+            "Clima", "Calor", "Frio", "Chuva", "Neve", "Vento", "Tempestade", "Nevoeiro", "Geada", "Secura",
+            "Alimento", "Cereal", "Legume", "Verdura", "Fruta", "Carne", "Peixe", "Ovo", "Leite", "Queijo",
+            "Bebida", "Água", "Suco", "Refrigerante", "Café", "Chá", "Leite", "Cerveja", "Vinho", "Whisky",
+            "Doce", "Chocolate", "Bolo", "Sorvete", "Pudim", "Brigadeiro", "Beijinho", "Paçoca", "Pé de moleque", "Cocada",
+            "Tempero", "Sal", "Açúcar", "Pimenta", "Alho", "Cebola", "Salsa", "Coentro", "Louro", "Canela",
+            "Utensílio", "Garfo", "Faca", "Colher", "Prato", "Copo", "Xícara", "Panela", "Frigideira", "Assadeira",
+            "Material", "Papel", "Plástico", "Vidro", "Metal", "Madeira", "Tecido", "Couro", "Borracha", "Argila",
+            "Cor", "Vermelho", "Azul", "Amarelo", "Verde", "Roxo", "Laranja", "Preto", "Branco", "Cinza",
+            "Forma", "Círculo", "Quadrado", "Triângulo", "Retângulo", "Losango", "Estrela", "Coração", "Oval", "Linha",
+            "Tamanho", "Grande", "Pequeno", "Alto", "Baixo", "Largo", "Estreito", "Gordo", "Magro", "Comprido",
+            "Quantidade", "Muito", "Pouco", "Algum", "Nenhum", "Todo", "Vários", "Diversos", "Certo", "Inúmero"
+        ];;
+        let palavraAtual = '';
+        let jogadorAtualIndex = 0;
+        let chutes = [];
+
+        function adicionarJogador() {
+            const input = document.getElementById('nomeJogador');
+            const nome = input.value.trim();
+            if (nome === '') {
+                alert('Digite um nome válido!');
+                return;
+            }
+            if (jogadores.includes(nome)) {
+                alert('Este nome já está na lista!');
+                return;
+            }
+            jogadores.push(nome);
+            atualizarListaJogadores();
+            input.value = '';
+        }
+
+        function atualizarListaJogadores() {
+            const lista = document.getElementById('listaJogadores');
+            lista.innerHTML = '';
+            jogadores.forEach(nome => {
+                const li = document.createElement('li');
+                li.className = 'flex justify-between items-center p-2 bg-gray-50 rounded-lg';
+                li.innerHTML = `
+                    <span>${nome}</span>
+                    <button 
+                        onclick="removerJogador('${nome}')" 
+                        class="text-red-500 hover:text-red-700"
+                    >
+                        Remover
+                    </button>
+                `;
+                lista.appendChild(li);
+            });
+            document.getElementById('contagem').textContent = `Total: ${jogadores.length} jogadores`;
+        }
+
+        function removerJogador(nome) {
+            jogadores = jogadores.filter(jogador => jogador !== nome);
+            atualizarListaJogadores();
+        }
+
+        function iniciarJogo() {
+            if (jogadores.length < 2) {
+                alert('Adicione pelo menos 2 jogadores!');
+                return;
+            }
+            document.getElementById('telaInicial').classList.add('hidden');
+            mostrarEscolhaPalavra();
+        }
+
+        function mostrarEscolhaPalavra() {
+            document.getElementById('telaPalavra').classList.remove('hidden');
+            document.getElementById('jogadorAtual').textContent = `Vez de ${jogadores[jogadorAtualIndex]}`;
+            const opcoes = document.getElementById('opcoesPalavras');
+            opcoes.innerHTML = '';
+            const palavrasAleatorias = palavras.sort(() => Math.random() - 0.5).slice(0, 3);
+            palavrasAleatorias.forEach(palavra => {
+                const btn = document.createElement('button');
+                btn.className = 'bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition';
+                btn.textContent = palavra;
+                btn.onclick = () => selecionarPalavra(palavra);
+                opcoes.appendChild(btn);
+            });
+        }
+
+        function selecionarPalavra(palavra) {
+            palavraAtual = palavra;
+            document.getElementById('telaPalavra').classList.add('hidden');
+            document.getElementById('telaDesenho').classList.remove('hidden');
+            document.getElementById('jogadorDesenhando').textContent = `${jogadores[jogadorAtualIndex]} está desenhando!`;
+        }
+
+        function selecionarCor(cor) {
+            document.getElementById('corPincel').value = cor;
+        }
+
+        function sketch(p) {
+            let isDrawing = false;
+            let startX, startY;
+
+            p.setup = function() {
+                let canvas = p.createCanvas(600, 400);
+                canvas.parent('canvasContainer');
+                p.background(255);
+                p.strokeWeight(5);
+                p.stroke(0);
+            };
+
+            p.mousePressed = function() {
+                if (p.mouseX >= 0 && p.mouseX <= p.width && p.mouseY >= 0 && p.mouseY <= p.height) {
+                    isDrawing = true;
+                    startX = p.mouseX;
+                    startY = p.mouseY;
+                    let ferramenta = document.getElementById('ferramenta').value;
+                    if (ferramenta === 'preenchimento') {
+                        let cor = document.getElementById('corPincel').value;
+                        p.background(cor);
+                    }
+                }
+            };
+
+            p.mouseReleased = function() {
+                if (isDrawing && p.mouseX >= 0 && p.mouseX <= p.width && p.mouseY >= 0 && p.mouseY <= p.height) {
+                    let ferramenta = document.getElementById('ferramenta').value;
+                    let tamanho = parseInt(document.getElementById('pincelTamanho').value);
+                    let cor = document.getElementById('corPincel').value;
+                    p.stroke(cor);
+                    p.strokeWeight(tamanho);
+                    if (ferramenta === 'linha') {
+                        p.line(startX, startY, p.mouseX, p.mouseY);
+                    } else if (ferramenta === 'retangulo') {
+                        p.noFill();
+                        p.rect(startX, startY, p.mouseX - startX, p.mouseY - startY);
+                    } else if (ferramenta === 'circulo') {
+                        p.noFill();
+                        let raioX = Math.abs(p.mouseX - startX) / 2;
+                        let raioY = Math.abs(p.mouseY - startY) / 2;
+                        let centroX = startX + (p.mouseX - startX) / 2;
+                        let centroY = startY + (p.mouseY - startY) / 2;
+                        p.ellipse(centroX, centroY, raioX * 2, raioY * 2);
+                    }
+                }
+                isDrawing = false;
+            };
+
+            p.mouseDragged = function() {
+                if (isDrawing && p.mouseX >= 0 && p.mouseX <= p.width && p.mouseY >= 0 && p.mouseY <= p.height) {
+                    let ferramenta = document.getElementById('ferramenta').value;
+                    let tamanho = parseInt(document.getElementById('pincelTamanho').value);
+                    let cor = document.getElementById('corPincel').value;
+                    p.stroke(ferramenta === 'borracha' ? 255 : cor);
+                    p.strokeWeight(tamanho);
+                    if (ferramenta === 'lapis') {
+                        p.line(p.pmouseX, p.pmouseY, p.mouseX, p.mouseY);
+                    } else if (ferramenta === 'pincel') {
+                        p.strokeWeight(tamanho * 1.5);
+                        p.line(p.pmouseX, p.pmouseY, p.mouseX, p.mouseY);
+                    } else if (ferramenta === 'spray') {
+                        for (let i = 0; i < 10; i++) {
+                            let offsetX = p.random(-tamanho / 2, tamanho / 2);
+                            let offsetY = p.random(-tamanho / 2, tamanho / 2);
+                            p.point(p.mouseX + offsetX, p.mouseY + offsetY);
+                        }
+                    } else if (ferramenta === 'borracha') {
+                        p.line(p.pmouseX, p.pmouseY, p.mouseX, p.mouseY);
+                    }
+                }
+            };
+        }
+
+        new p5(sketch);
+
+        function limparCanvas() {
+            let canvas = document.querySelector('canvas');
+            let p5Instance = p5.prototype;
+            p5Instance.background(255);
+        }
+
+        function finalizarDesenho() {
+            document.getElementById('telaDesenho').classList.add('hidden');
+            jogadorAtualIndex = (jogadorAtualIndex + 1) % jogadores.length;
+            chutes = [];
+            atualizarListaChutes();
+            if (jogadorAtualIndex === 0) {
+                alert('Fim da rodada! Iniciando nova rodada.');
+            }
+            mostrarEscolhaPalavra();
+        }
+
+        function enviarChute() {
+            const input = document.getElementById('chuteInput');
+            const chute = input.value.trim();
+            if (chute === '') {
+                alert('Digite um chute válido!');
+                return;
+            }
+            chutes.push({ jogador: jogadores[(jogadorAtualIndex + 1) % jogadores.length], chute });
+            atualizarListaChutes();
+            input.value = '';
+            if (chute.toLowerCase() === palavraAtual.toLowerCase()) {
+                alert(`${jogadores[(jogadorAtualIndex + 1) % jogadores.length]} acertou!`);
+                finalizarDesenho();
+            }
+        }
+
+        function atualizarListaChutes() {
+            const lista = document.getElementById('listaChutes');
+            lista.innerHTML = '';
+            chutes.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'p-2 bg-gray-50 rounded-lg';
+                li.textContent = `${item.jogador}: ${item.chute}`;
+                lista.appendChild(li);
+            });
+        }
+    </script>
 </body>
 </html>
