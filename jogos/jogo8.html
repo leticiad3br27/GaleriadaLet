@@ -3,30 +3,309 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo 8</title>
-    <link rel="stylesheet" href="../css/jogo8.css">
-    <script src="../js/jogo8.js" defer></script>
+    <title>🦖 Jogo da Memória de Dinossauros 🦕</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #8BC34A, #4CAF50 90%);
+            font-family: 'Arial', sans-serif;
+            color: #3E2723;
+        }
+        .game-container {
+            text-align: center;
+            background: rgba(255, 245, 230, 0.95);
+            padding: 24px;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(8px);
+            max-width: 90%;
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .board {
+            display: grid;
+            gap: 10px;
+            margin: 20px auto;
+            padding: 15px;
+            background: #A1887F;
+            border-radius: 12px;
+            box-shadow: 0 0 24px rgba(0, 0, 0, 0.1);
+            justify-content: center;
+        }
+        .square {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 32px;
+            cursor: pointer;
+            transition: transform 0.3s, background 0.2s;
+            user-select: none;
+            background: #795548;
+            border-radius: 10px;
+            position: relative;
+            transform-style: preserve-3d;
+        }
+        .square:hover {
+            transform: scale(1.07);
+            filter: brightness(1.08);
+        }
+        .square.flipped {
+            transform: rotateY(180deg);
+        }
+        .square .front {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 32px;
+            position: absolute;
+            backface-visibility: hidden;
+            transform: rotateY(180deg);
+            background: #daffdb;
+            border-radius: 10px;
+        }
+        .square .back {
+            width: 100%;
+            height: 100%;
+            background: #6D4C41;
+            position: absolute;
+            backface-visibility: hidden;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            color: #D7CCC8;
+        }
+        .controls {
+            margin: 12px 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+        button, select {
+            padding: 10px 22px;
+            margin: 6px;
+            border: none;
+            border-radius: 25px;
+            background: #8BC34A;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+        button:hover, select:hover {
+            background: #689F38;
+            transform: translateY(-2px);
+        }
+        h1 {
+            font-size: 38px;
+            margin-bottom: 12px;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+            color: #3E2723;
+            text-align: center;
+            width: 100%;
+        }
+        #status, #timer {
+            font-size: 19px;
+            margin: 12px 0;
+            color: #3E2723;
+            letter-spacing: 1px;
+            text-align: center;
+            width: 100%;
+        }
+        @media (max-width: 600px) {
+            .game-container {
+                padding: 16px;
+                margin: 10px;
+            }
+            .board {
+                gap: 8px;
+                padding: 10px;
+            }
+            .square {
+                font-size: 24px;
+            }
+            .square .front {
+                font-size: 24px;
+            }
+            .square .back {
+                font-size: 20px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            button, select {
+                padding: 8px 15px;
+                font-size: 14px;
+            }
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Detalhes do Jogo 8</h1>
-    </header>
-    <main>
-        <section>
-            <h2>Descrição</h2>
-            <p>Aqui você pode adicionar uma descrição detalhada do Jogo 8.</p>
-        </section>
-        <section>
-            <h2>Imagens</h2>
-            <img src="../imagens/jogo8-thumbnail.jpg" alt="Thumbnail do Jogo 8">
-        </section>
-        <section>
-            <h2>Links</h2>
-            <a href="https://link-para-o-jogo8.com">Jogar Jogo 8</a>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2023 Galeria de Jogos</p>
-    </footer>
+    <div class="game-container">
+        <h1>🦖 Jogo da Memória de Dinossauros 🦕</h1>
+        <div id="status">Jogadas: 0</div>
+        <div id="timer">Tempo: 00:00</div>
+        <div class="controls">
+            <select id="card-count">
+                <option value="4">4 cartas (2x2)</option>
+                <option value="16">16 cartas (4x4)</option>
+                <option value="36">36 cartas (6x6)</option>
+            </select>
+            <button id="start">Iniciar Jogo 🌿</button>
+            <button id="restart">Reiniciar Jogo 🌿</button>
+        </div>
+        <div class="board" id="game-board"></div>
+    </div>
+
+    <script>
+        const gameBoard = document.getElementById('game-board');
+        const statusDisplay = document.getElementById('status');
+        const timerDisplay = document.getElementById('timer');
+        const startButton = document.getElementById('start');
+        const restartButton = document.getElementById('restart');
+        const cardCountSelect = document.getElementById('card-count');
+        let jogadas = 0;
+        let cartasViradas = [];
+        let cartasCombinadas = [];
+        let timerInterval = null;
+        let seconds = 0;
+        let isGameStarted = false;
+
+        // Array base de emojis de dinossauros
+        const baseEmojis = ['🦖', '🦕', '🐉', '🐊', '🦎', '🐍', '🦒', '🐘', '🦒', '🐘', '🦖', '🦕', '🐉', '🐊', '🦎', '🐍', '🦒', '🐘'];
+
+        // Atualizar temporizador
+        function updateTimer() {
+            seconds++;
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            timerDisplay.textContent = `Tempo: ${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        // Iniciar temporizador
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            seconds = 0;
+            timerDisplay.textContent = `Tempo: 00:00`;
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        // Parar temporizador
+        function stopTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+        }
+
+        // Criar tabuleiro com base no número de cartas
+        function criarTabuleiro(numCartas) {
+            // Selecionar emojis necessários
+            const numPares = numCartas / 2;
+            let emojis = baseEmojis.slice(0, numPares);
+            emojis = [...emojis, ...emojis].sort(() => Math.random() - 0.5);
+
+            // Ajustar tamanho do grid e das cartas
+            const raiz = Math.sqrt(numCartas);
+            const cardSize = numCartas === 4 ? 100 : numCartas === 16 ? 80 : 60;
+            gameBoard.style.gridTemplateColumns = `repeat(${raiz}, ${cardSize}px)`;
+            gameBoard.innerHTML = '';
+
+            emojis.forEach((emoji, index) => {
+                const carta = document.createElement('div');
+                carta.classList.add('square');
+                carta.dataset.emoji = emoji;
+                carta.style.width = `${cardSize}px`;
+                carta.style.height = `${cardSize}px`;
+
+                const frente = document.createElement('div');
+                frente.classList.add('front');
+                frente.textContent = emoji;
+                const verso = document.createElement('div');
+                verso.classList.add('back');
+                verso.textContent = '🌴';
+
+                carta.appendChild(frente);
+                carta.appendChild(verso);
+                gameBoard.appendChild(carta);
+
+                carta.addEventListener('click', () => virarCarta(carta));
+            });
+        }
+
+        // Lógica para virar carta
+        function virarCarta(carta) {
+            if (!isGameStarted) return;
+            if (cartasViradas.length < 2 && !cartasViradas.includes(carta) && !cartasCombinadas.includes(carta)) {
+                carta.classList.add('flipped');
+                cartasViradas.push(carta);
+
+                if (cartasViradas.length === 2) {
+                    jogadas++;
+                    statusDisplay.textContent = `Jogadas: ${jogadas}`;
+                    verificarCombinacao();
+                }
+            }
+        }
+
+        // Verificar se as cartas viradas combinam
+        function verificarCombinacao() {
+            const [carta1, carta2] = cartasViradas;
+            if (carta1.dataset.emoji === carta2.dataset.emoji) {
+                cartasCombinadas.push(carta1, carta2);
+                cartasViradas = [];
+                if (cartasCombinadas.length === parseInt(cardCountSelect.value)) {
+                    stopTimer();
+                    setTimeout(() => alert(`Parabéns! Você encontrou todos os dinos em ${timerDisplay.textContent}! 🦖🎉`), 500);
+                }
+            } else {
+                setTimeout(() => {
+                    carta1.classList.remove('flipped');
+                    carta2.classList.remove('flipped');
+                    cartasViradas = [];
+                }, 1000);
+            }
+        }
+
+        // Iniciar jogo
+        startButton.addEventListener('click', () => {
+            const numCartas = parseInt(cardCountSelect.value);
+            jogadas = 0;
+            statusDisplay.textContent = `Jogadas: ${jogadas}`;
+            cartasViradas = [];
+            cartasCombinadas = [];
+            isGameStarted = true;
+            startTimer();
+            criarTabuleiro(numCartas);
+        });
+
+        // Reiniciar jogo
+        restartButton.addEventListener('click', () => {
+            const numCartas = parseInt(cardCountSelect.value);
+            jogadas = 0;
+            statusDisplay.textContent = `Jogadas: ${jogadas}`;
+            cartasViradas = [];
+            cartasCombinadas = [];
+            isGameStarted = true;
+            startTimer();
+            criarTabuleiro(numCartas);
+        });
+
+        // Inicializar tabuleiro com 4 cartas
+        criarTabuleiro(4);
+    </script>
 </body>
 </html>

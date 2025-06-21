@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo da Forca</title>
+    <title>Jogo da Forca - Dinossauros Fofos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Chewy&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #3498db;
-            --secondary-color: #2ecc71;
-            --danger-color: #e74c3c;
-            --light-color: #ecf0f1;
-            --dark-color: #2c3e50;
+            --primary-color: #689f38;
+            --secondary-color: #81c784;
+            --danger-color: #ff9999;
+            --light-color: #e6f4e8;
+            --dark-color: #4a3728;
             --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
@@ -18,38 +19,56 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Chewy', cursive;
         }
 
         body {
-            background-color: #f5f5f5;
+            background: linear-gradient(135deg, #e6f4e8 0%, #c8e6c9 100%);
             color: var(--dark-color);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 20px;
+            background-image: url('https://www.transparenttextures.com/patterns/dino-footprints.png');
+            background-size: 200px;
+            background-repeat: repeat;
         }
 
         header {
             text-align: center;
             margin-bottom: 30px;
+            background: #a5d6a7;
+            padding: 1.5rem;
+            width: 100%;
+            border-bottom: 3px solid #81c784;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
         }
 
         h1 {
             color: var(--primary-color);
             margin-bottom: 10px;
             font-size: 2.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(45deg, #689f38, #81c784);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            color: var(--dark-color);
+            font-size: 1.2rem;
         }
 
         .game-container {
-            background-color: white;
+            background: #f1f8e9;
             border-radius: 10px;
             box-shadow: var(--shadow);
             padding: 30px;
             width: 100%;
             max-width: 800px;
             margin-bottom: 20px;
+            border: 2px solid #a5d6a7;
         }
 
         .mode-selection {
@@ -62,9 +81,9 @@
         .mode-btn {
             padding: 12px 24px;
             border: none;
-            border-radius: 5px;
-            background-color: var(--primary-color);
-            color: white;
+            border-radius: 12px;
+            background: linear-gradient(90deg, #81c784 60%, #a5d6a7 100%);
+            color: var(--dark-color);
             font-size: 1rem;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -73,11 +92,12 @@
 
         .mode-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(90deg, #a5d6a7 60%, #81c784 100%);
+            box-shadow: 0 6px 8px rgba(129, 199, 132, 0.2);
         }
 
         .mode-btn.active {
-            background-color: var(--secondary-color);
+            background: linear-gradient(90deg, #689f38 60%, #81c784 100%);
         }
 
         .game-area {
@@ -95,8 +115,9 @@
         }
 
         canvas {
-            border: 2px solid var(--dark-color);
+            border: 2px solid #a5d6a7;
             border-radius: 5px;
+            background: #e6f4e8;
         }
 
         .word-display {
@@ -105,7 +126,8 @@
             text-align: center;
             margin: 20px 0;
             min-height: 50px;
-            font-family: monospace;
+            font-family: 'Chewy', cursive;
+            color: var(--primary-color);
         }
 
         .keyboard {
@@ -120,29 +142,32 @@
             font-size: 1.2rem;
             border: none;
             border-radius: 5px;
-            background-color: var(--light-color);
+            background: var(--light-color);
             cursor: pointer;
             transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(129, 199, 132, 0.1);
+            border: 1px solid #a5d6a7;
         }
 
         .keyboard-btn:hover {
-            background-color: #d5dbdb;
+            background: #c8e6c9;
+            transform: scale(1.05);
         }
 
         .keyboard-btn.used {
-            background-color: #bdc3c7;
+            background: #d5dbdb;
             color: #7f8c8d;
             cursor: not-allowed;
         }
 
         .keyboard-btn.correct {
-            background-color: var(--secondary-color);
-            color: white;
+            background: var(--secondary-color);
+            color: #fff;
         }
 
         .keyboard-btn.wrong {
-            background-color: var(--danger-color);
-            color: white;
+            background: var(--danger-color);
+            color: #fff;
         }
 
         .input-section {
@@ -160,28 +185,38 @@
 
         label {
             font-weight: bold;
+            color: var(--dark-color);
         }
 
         input {
             padding: 10px;
-            border: 1px solid #ddd;
+            border: 1px solid #a5d6a7;
             border-radius: 5px;
             font-size: 1rem;
+            background: #e6f4e8;
+            color: var(--dark-color);
+        }
+
+        input:focus {
+            border-color: #689f38;
+            box-shadow: 0 0 8px rgba(104, 159, 56, 0.3);
         }
 
         .action-btn {
             padding: 12px;
             border: none;
-            border-radius: 5px;
-            background-color: var(--primary-color);
-            color: white;
+            border-radius: 12px;
+            background: linear-gradient(90deg, #81c784 60%, #a5d6a7 100%);
+            color: var(--dark-color);
             font-size: 1rem;
             cursor: pointer;
             transition: all 0.3s ease;
+            box-shadow: var(--shadow);
         }
 
         .action-btn:hover {
-            background-color: #2980b9;
+            background: linear-gradient(90deg, #a5d6a7 60%, #81c784 100%);
+            transform: scale(1.05);
         }
 
         .message {
@@ -207,9 +242,42 @@
             display: none;
         }
 
+        footer {
+            background: #a5d6a7;
+            text-align: center;
+            padding: 1.5rem;
+            width: 100%;
+            border-top: 3px solid #81c784;
+            box-shadow: 0 -6px 12px rgba(0, 0, 0, 0.1);
+            margin-top: auto;
+        }
+
+        .back-to-menu {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(90deg, #81c784 60%, #a5d6a7 100%);
+            color: var(--dark-color);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+        }
+
+        .back-to-menu:hover {
+            background: linear-gradient(90deg, #a5d6a7 60%, #81c784 100%);
+            transform: scale(1.05);
+        }
+
         @media (max-width: 768px) {
             .keyboard {
                 grid-template-columns: repeat(7, 1fr);
+            }
+            .game-container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 2rem;
             }
         }
 
@@ -217,13 +285,19 @@
             .keyboard {
                 grid-template-columns: repeat(5, 1fr);
             }
-            
             .game-container {
                 padding: 15px;
             }
-            
             h1 {
-                font-size: 2rem;
+                font-size: 1.8rem;
+            }
+            .word-display {
+                font-size: 1.5rem;
+                letter-spacing: 8px;
+            }
+            .back-to-menu {
+                padding: 10px 20px;
+                font-size: 0.9rem;
             }
         }
     </style>
@@ -231,13 +305,13 @@
 <body>
     <header>
         <h1>Jogo da Forca</h1>
-        <p>Adivinhe a palavra antes que o boneco seja enforcado!</p>
+        <p>Adivinhe a palavra antes que o dinossauro fique triste!</p>
     </header>
 
     <div class="game-container">
         <div class="mode-selection">
-            <button class="mode-btn" id="singlePlayerBtn">Um Jogador</button>
-            <button class="mode-btn" id="twoPlayersBtn">Dois Jogadores</button>
+            <button class="mode-btn" id="singlePlayerBtn" tabindex="0">Um Jogador</button>
+            <button class="mode-btn" id="twoPlayersBtn" tabindex="0">Dois Jogadores</button>
         </div>
 
         <div class="game-area" id="singlePlayerArea">
@@ -248,16 +322,16 @@
             <div class="word-display" id="wordDisplay"></div>
             <div class="message" id="message"></div>
             <div class="keyboard" id="keyboard"></div>
-            <button class="action-btn" id="newGameBtn">Novo Jogo</button>
+            <button class="action-btn" id="newGameBtn" tabindex="0">Novo Jogo</button>
         </div>
 
         <div class="game-area" id="twoPlayersArea">
             <div class="input-section" id="wordInputSection">
                 <div class="input-group">
                     <label for="secretWord">Jogador 1: Digite a palavra secreta</label>
-                    <input type="text" id="secretWord" placeholder="Digite a palavra (sem espaços)">
+                    <input type="text" id="secretWord" placeholder="Digite a palavra (sem espaços)" tabindex="0">
                 </div>
-                <button class="action-btn" id="startGameBtn">Iniciar Jogo</button>
+                <button class="action-btn" id="startGameBtn" tabindex="0">Iniciar Jogo</button>
             </div>
 
             <div class="game-play" id="gamePlaySection" style="display: none;">
@@ -268,13 +342,16 @@
                 <div class="word-display" id="wordDisplay2"></div>
                 <div class="message" id="message2"></div>
                 <div class="keyboard" id="keyboard2"></div>
-                <button class="action-btn" id="newGameBtn2">Novo Jogo</button>
+                <button class="action-btn" id="newGameBtn2" tabindex="0">Novo Jogo</button>
             </div>
         </div>
     </div>
 
+    <footer>
+        <button class="back-to-menu" onclick="window.location.href='index.html'" tabindex="0" aria-label="Voltar ao menu principal">Voltar ao Menu</button>
+    </footer>
+
     <script>
-        
         const wordList = [
             "COMPUTADOR", "PROGRAMACAO", "ALGORITMO", "INTERNET", "TECNOLOGIA",
             "DESENVOLVIMENTO", "JAVASCRIPT", "FRAMEWORK", "BANCO DE DADOS", "FUNCIONAL",
@@ -383,7 +460,6 @@
 
         // Funções do jogo
         function startNewGame() {
-            // Escolhe uma palavra aleatória para o modo single player
             if (gameMode === 'single') {
                 secretWord = wordList[Math.floor(Math.random() * wordList.length)];
             }
@@ -392,21 +468,16 @@
             wrongGuesses = 0;
             gameOver = false;
             
-            // Limpa o canvas e desenha a base
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             drawHangmanBase(ctx);
             
-            // Atualiza a exibição da palavra
             updateWordDisplay();
             
-            // Limpa mensagens
             message.textContent = '';
             message.className = 'message';
             
-            // Reinicia o teclado
             resetKeyboard();
             
-            // Atualiza o turno do jogador
             singlePlayerTurn.textContent = 'Tente adivinhar a palavra secreta!';
         }
 
@@ -415,21 +486,16 @@
             wrongGuesses = 0;
             gameOver = false;
             
-            // Limpa o canvas e desenha a base
             ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
             drawHangmanBase(ctx2);
             
-            // Atualiza a exibição da palavra
             updateWordDisplayTwoPlayers();
             
-            // Limpa mensagens
             message2.textContent = '';
             message2.className = 'message';
             
-            // Reinicia o teclado
             resetKeyboard2();
             
-            // Atualiza o turno do jogador
             playerTurn.textContent = 'Jogador 2: Tente adivinhar a palavra secreta!';
             currentPlayer = 2;
         }
@@ -447,7 +513,6 @@
             }
             wordDisplay.textContent = display.trim();
             
-            // Verifica se o jogador ganhou
             if (!display.includes('_')) {
                 gameOver = true;
                 message.textContent = 'Parabéns! Você acertou a palavra!';
@@ -468,7 +533,6 @@
             }
             wordDisplay2.textContent = display.trim();
             
-            // Verifica se o jogador ganhou
             if (!display.includes('_')) {
                 gameOver = true;
                 message2.textContent = 'Parabéns Jogador 2! Você acertou a palavra!';
@@ -484,7 +548,14 @@
                 const button = document.createElement('button');
                 button.textContent = letter;
                 button.className = 'keyboard-btn';
+                button.setAttribute('tabindex', '0');
                 button.addEventListener('click', () => handleGuess(letter, button));
+                button.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleGuess(letter, button);
+                    }
+                });
                 keyboard.appendChild(button);
             });
         }
@@ -497,7 +568,14 @@
                 const button = document.createElement('button');
                 button.textContent = letter;
                 button.className = 'keyboard-btn';
+                button.setAttribute('tabindex', '0');
                 button.addEventListener('click', () => handleGuessTwoPlayers(letter, button));
+                button.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleGuessTwoPlayers(letter, button);
+                    }
+                });
                 keyboard2.appendChild(button);
             });
         }
@@ -561,7 +639,7 @@
         }
 
         function drawHangmanBase(context) {
-            context.strokeStyle = '#000';
+            context.strokeStyle = '#4a3728';
             context.lineWidth = 2;
             
             // Base
@@ -590,13 +668,29 @@
         }
 
         function drawHangmanPart(part, context) {
-            context.strokeStyle = '#000';
+            context.strokeStyle = '#4a3728';
             context.lineWidth = 2;
             
             switch (part) {
-                case 1: // Cabeça
+                case 1: // Cabeça com orelhas de dinossauro
                     context.beginPath();
                     context.arc(200, 100, 20, 0, Math.PI * 2);
+                    context.stroke();
+                    // Orelha esquerda
+                    context.beginPath();
+                    context.moveTo(190, 85);
+                    context.lineTo(180, 70);
+                    context.lineTo(185, 85);
+                    context.fillStyle = '#81c784';
+                    context.fill();
+                    context.stroke();
+                    // Orelha direita
+                    context.beginPath();
+                    context.moveTo(210, 85);
+                    context.lineTo(220, 70);
+                    context.lineTo(215, 85);
+                    context.fillStyle = '#81c784';
+                    context.fill();
                     context.stroke();
                     break;
                 case 2: // Corpo
@@ -623,20 +717,22 @@
                     context.lineTo(170, 210);
                     context.stroke();
                     break;
-                case 6: // Perna direita
+                case 6: // Perna direita e olhos tristes
                     context.beginPath();
                     context.moveTo(200, 180);
                     context.lineTo(230, 210);
                     context.stroke();
-                    
                     // Olhos tristes
                     context.beginPath();
                     context.arc(193, 95, 2, 0, Math.PI * 2);
+                    context.fillStyle = '#4a3728';
+                    context.fill();
                     context.stroke();
                     context.beginPath();
                     context.arc(207, 95, 2, 0, Math.PI * 2);
+                    context.fillStyle = '#4a3728';
+                    context.fill();
                     context.stroke();
-                    
                     // Boca triste
                     context.beginPath();
                     context.arc(200, 105, 10, 0.1 * Math.PI, 0.9 * Math.PI);

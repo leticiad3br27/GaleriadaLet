@@ -7,143 +7,203 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-            background: linear-gradient(to bottom, #e5e7eb, #d1d5db);
-            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom, #1e3a8a, #3b82f6);
+            font-family: 'Segoe UI', Arial, sans-serif;
             overscroll-behavior: none;
+            color: #f3f4f6;
+        }
+        #game-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            padding: 0.5rem; /* Reduzido de 1rem */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
         }
         #board {
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
             grid-gap: 0;
             gap: 0;
             line-height: 0;
-            background-color: #1f2937;
-            touch-action: none;
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
         }
         .square {
-            width: 60px;
-            height: 60px;
+            width: 50px; /* Reduzido de 60px */
+            height: 50px;
             display: flex;
             justify-content: center;
             align-items: center;
             margin: 0;
             padding: 0;
             transition: background-color 0.2s ease-in-out, transform 0.1s;
+            border: none;
         }
         .square:hover {
-            transform: scale(1.02);
+            transform: scale(1.03);
         }
         .piece {
-            width: 48px;
-            height: 48px;
+            width: 40px; /* Reduzido de 48px */
+            height: 40px;
             border-radius: 50%;
             border: 2px solid;
             transition: transform 0.2s ease-in-out, opacity 0.3s, box-shadow 0.2s;
             cursor: grab;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-        }
-        .piece:hover {
-            transform: scale(1.1);
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
         }
-        .piece:active {
+        .piece:hover {
+            transform: scale(1.15);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+        }
+        .piece:active, .piece.dragging {
             cursor: grabbing;
             transform: scale(0.95);
+            opacity: 0.8;
         }
         .king {
             position: relative;
         }
         .king::after {
-            content: '★';
+            content: '👑';
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            color: #facc15;
-            font-size: 18px;
-            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-            animation: pulse 2s infinite;
+            color: #eab308;
+            font-size: 16px; /* Reduzido de 20px */
+            text-shadow: 0 0 8px rgba(0, 0, 0, 0.6);
+            animation: pulse 1.5s infinite;
         }
         @keyframes pulse {
             0% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-50%, -50%) scale(1.2); }
+            50% { transform: translate(-50%, -50%) scale(1.3); }
             100% { transform: translate(-50%, -50%) scale(1); }
         }
         .move-animation {
-            animation: movePiece 0.3s ease-in-out;
+            animation: movePiece 0.4s ease-in-out;
         }
         @keyframes movePiece {
             0% { transform: scale(1); }
-            50% { transform: scale(1.15); }
+            50% { transform: scale(1.2); }
             100% { transform: scale(1); }
+        }
+        .highlight-selected {
+            background-color: #facc15 !important;
+            transform: scale(1.05);
+        }
+        .highlight-possible {
+            background-color: #4ade80 !important;
+            transform: scale(1.03);
+        }
+        #menu, #stats, #move-history {
+            background: rgba(255, 255, 255, 0.95);
+            color: #1f2937;
+            border-radius: 0.75rem;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        #menu:hover, #stats:hover, #move-history:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+        }
+        button {
+            background: linear-gradient(to right, #3b82f6, #1d4ed8);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            color: white;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        button:hover {
+            background: linear-gradient(to right, #2563eb, #1e40af);
+            transform: translateY(-2px);
+        }
+        select {
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            transition: all 0.2s ease;
+        }
+        select:focus {
+            outline: none;
+            ring: 2px solid #3b82f6;
         }
         @media (max-width: 600px) {
             .square {
-                width: 45px;
-                height: 45px;
+                width: 40px; /* Reduzido de 45px */
+                height: 40px;
             }
             .piece {
-                width: 36px;
-                height: 36px;
+                width: 32px; /* Reduzido de 36px */
+                height: 32px;
             }
             .king::after {
-                font-size: 14px;
+                font-size: 14px; /* Reduzido de 16px */
             }
         }
         @media (max-width: 400px) {
             .square {
-                width: 35px;
-                height: 35px;
+                width: 30px; /* Reduzido de 35px */
+                height: 30px;
             }
             .piece {
-                width: 28px;
-                height: 28px;
+                width: 24px; /* Reduzido de 28px */
+                height: 24px;
             }
             .king::after {
-                font-size: 12px;
+                font-size: 12px; /* Reduzido de 14px */
             }
         }
     </style>
 </head>
-<body class="flex flex-col items-center min-h-screen p-4">
-    <div id="game-container" class="max-w-lg w-full">
-        <div id="menu" class="bg-white p-6 rounded-xl shadow-2xl mb-6 text-center transform transition-all duration-300 hover:shadow-xl">
-            <h1 class="text-3xl font-bold mb-4 text-gray-800">Jogo de Damas</h1>
-            <div class="mb-4">
+<body class="flex flex-col items-center min-h-screen p-6">
+    <div id="game-container" class="max-w-2xl w-full">
+        <div id="menu" class="p-8 rounded-xl mb-6 text-center">
+            <h1 class="text-4xl font-bold mb-6 text-gray-900">Jogo de Damas</h1>
+            <div class="mb-6">
                 <label for="players" class="block text-lg font-medium mb-2 text-gray-700">Número de Jogadores:</label>
-                <select id="players" class="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" aria-label="Número de jogadores">
+                <select id="players" class="p-3 w-full focus:ring-2 focus:ring-blue-500" aria-label="Número de jogadores">
                     <option value="2">2 Jogadores</option>
                     <option value="1">1 Jogador (contra IA)</option>
                 </select>
             </div>
-            <div class="mb-4">
+            <div class="mb-6">
                 <label for="color" class="block text-lg font-medium mb-2 text-gray-700">Escolha a cor (Jogador 1):</label>
-                <select id="color" class="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" aria-label="Cor do jogador 1">
+                <select id="color" class="p-3 w-full focus:ring-2 focus:ring-blue-500" aria-label="Cor do jogador 1">
                     <option value="white">Brancas</option>
                     <option value="black">Pretas</option>
                 </select>
             </div>
-            <div class="mb-4">
+            <div class="mb-6">
                 <label for="difficulty" class="block text-lg font-medium mb-2 text-gray-700">Dificuldade da IA:</label>
-                <select id="difficulty" class="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" aria-label="Dificuldade da IA">
+                <select id="difficulty" class="p-3 w-full focus:ring-2 focus:ring-blue-500" aria-label="Dificuldade da IA">
                     <option value="1">Fácil</option>
                     <option value="2">Médio</option>
                     <option value="3">Difícil</option>
                 </select>
             </div>
-            <button onclick="startGame()" class="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2 rounded-md hover:from-blue-700 hover:to-blue-800 transition-all duration-200" aria-label="Iniciar jogo">Iniciar Jogo</button>
+            <button onclick="startGame()" class="px-8 py-3 text-lg" aria-label="Iniciar jogo">Iniciar Jogo</button>
         </div>
-        <div id="board" class="grid grid-cols-8 mx-auto border-2 border-gray-900 rounded-lg shadow-lg" role="grid" aria-label="Tabuleiro de damas"></div>
-        <div id="info" class="mt-4 text-lg font-semibold text-gray-800 text-center" role="status"></div>
-        <div id="stats" class="mt-4 bg-white p-4 rounded-xl shadow-md">
-            <h2 class="text-lg font-semibold text-gray-800 mb-2">Estatísticas</h2>
+        <div id="board" class="grid gap-0" role="grid" aria-label="Tabuleiro de damas"></div>
+        <div id="info" class="mt-6 text-xl font-semibold text-center" role="status"></div>
+        <div id="stats" class="mt-6 p-6 rounded-xl">
+            <h2 class="text-xl font-semibold text-gray-800 mb-3">Estatísticas</h2>
             <p id="game-time" class="text-gray-700">Tempo de jogo: 0s</p>
             <p id="pieces-remaining" class="text-gray-700">Peças restantes: Brancas 12 | Pretas 12</p>
         </div>
-        <div id="controls" class="mt-4 flex justify-center space-x-4">
-            <button onclick="undoMove()" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-all duration-200" aria-label="Desfazer movimento">Desfazer</button>
-            <button onclick="resetGame()" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition-all duration-200" aria-label="Reiniciar jogo">Reiniciar</button>
+        <div id="controls" class="mt-6 flex justify-center space-x-6">
+            <button onclick="undoMove()" class="px-6 py-3" aria-label="Desfazer movimento">Desfazer</button>
+            <button onclick="resetGame()" class="bg-red-600 hover:bg-red-700 px-6 py-3" aria-label="Reiniciar jogo">Reiniciar</button>
         </div>
-        <div id="move-history" class="mt-4 bg-white p-4 rounded-xl shadow-md max-h-40 overflow-y-auto" aria-label="Histórico de movimentos">
-            <h2 class="text-lg font-semibold text-gray-800 mb-2">Histórico de Movimentos</h2>
+        <div id="move-history" class="mt-6 p-6 rounded-xl max-h-48 overflow-y-auto" aria-label="Histórico de movimentos">
+            <h2 class="text-xl font-semibold text-gray-800 mb-3">Histórico de Movimentos</h2>
             <ul id="move-list" class="list-disc list-inside text-gray-700"></ul>
         </div>
     </div>
@@ -162,10 +222,10 @@
         let startTime = null;
         let gameTimer = null;
 
-        // Sound effects
+        // Sem sons pra evitar o erro
         const sounds = {
-            move: new Audio('https://freesound.org/data/previews/512/512614_5674468-lq.mp3'),
-            capture: new Audio('https://freesound.org/data/previews/517/517713_7037-lq.mp3')
+            move: null,
+            capture: null
         };
 
         // Initialize the game board
@@ -195,7 +255,8 @@
             for (let row = 0; row < 8; row++) {
                 for (let col = 0; col < 8; col++) {
                     const square = document.createElement('div');
-                    square.className = `square ${(row + col) % 2 === 0 ? 'bg-amber-100' : 'bg-amber-900'} cursor-pointer`;
+                    // Casa escura em (row + col) % 2 === 1
+                    square.className = `square ${(row + col) % 2 === 0 ? 'bg-amber-200' : 'bg-amber-800'} cursor-pointer`;
                     square.dataset.row = row;
                     square.dataset.col = col;
                     square.setAttribute('role', 'gridcell');
@@ -205,17 +266,73 @@
                         e.preventDefault();
                         handleClick(row, col);
                     });
+                    square.addEventListener('dragover', (e) => e.preventDefault());
+                    square.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        handleDrop(row, col);
+                    });
+
                     if (board[row][col]) {
                         const piece = document.createElement('div');
-                        piece.className = `piece ${board[row][col].color === 'white' ? 'bg-white border-gray-800' : 'bg-gray-900 border-white'} ${board[row][col].king ? 'king' : ''}`;
+                        piece.className = `piece ${board[row][col].color === 'white' ? 'bg-white border-gray-900' : 'bg-gray-900 border-white'} ${board[row][col].king ? 'king' : ''}`;
+                        piece.setAttribute('draggable', true);
                         piece.setAttribute('aria-label', `${board[row][col].color === 'white' ? 'Branca' : 'Preta'} ${board[row][col].king ? 'Dama' : 'Peça'}`);
+                        piece.addEventListener('dragstart', (e) => handleDragStart(e, row, col));
+                        piece.addEventListener('dragend', handleDragEnd);
                         square.appendChild(piece);
                     }
+
                     boardElement.appendChild(square);
                 }
             }
             mustCapture = hasCaptureMoves();
             updateInfo();
+        }
+
+        // Handle drag start
+        function handleDragStart(e, row, col) {
+            if (board[row][col] && board[row][col].color === currentPlayer) {
+                if (!mustCapture || getCaptureMoves(row, col).length > 0) {
+                    selectedPiece = { row, col };
+                    e.target.classList.add('dragging');
+                    highlightSelected(row, col);
+                    highlightPossibleMoves(row, col);
+                    e.dataTransfer.setData('text/plain', JSON.stringify({ row, col }));
+                } else {
+                    e.preventDefault();
+                }
+            } else {
+                e.preventDefault();
+            }
+        }
+
+        // Handle drag end
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+        }
+
+        // Handle drop
+        function handleDrop(row, col) {
+            if (selectedPiece) {
+                if (isPossibleMove(selectedPiece.row, selectedPiece.col, row, col)) {
+                    const move = movePiece(selectedPiece.row, selectedPiece.col, row, col);
+                    if (move && move.captured && hasCaptureMovesForPiece(row, col)) {
+                        selectedPiece = { row, col };
+                        highlightSelected(row, col);
+                        highlightPossibleMoves(row, col);
+                    } else {
+                        clearSelection();
+                        moveCount[currentPlayer]++;
+                        currentPlayer = currentPlayer === 'white' ? 'black' : 'white';
+                        renderBoard();
+                        if (numPlayers === 1 && currentPlayer !== playerColor) {
+                            setTimeout(aiMove, 500);
+                        }
+                    }
+                } else {
+                    clearSelection();
+                }
+            }
         }
 
         // Handle square clicks
@@ -250,7 +367,6 @@
             if (board[row][col] && board[row][col].color === currentPlayer) {
                 if (!mustCapture || getCaptureMoves(row, col).length > 0) {
                     selectedPiece = { row, col };
- strmarkdown
                     highlightSelected(row, col);
                     highlightPossibleMoves(row, col);
                 }
@@ -259,18 +375,18 @@
 
         // Highlight selected square
         function highlightSelected(row, col) {
-            document.querySelectorAll('.square').forEach(square => square.classList.remove('bg-yellow-400'));
+            document.querySelectorAll('.square').forEach(square => square.classList.remove('highlight-selected'));
             const square = document.querySelector(`.square[data-row="${row}"][data-col="${col}"]`);
-            square.classList.add('bg-yellow-400');
+            square.classList.add('highlight-selected');
         }
 
         // Highlight possible moves
         function highlightPossibleMoves(row, col) {
-            document.querySelectorAll('.square').forEach(square => square.classList.remove('bg-green-400'));
+            document.querySelectorAll('.square').forEach(square => square.classList.remove('highlight-possible'));
             const moves = mustCapture ? getCaptureMoves(row, col) : getPossibleMoves(row, col);
             moves.forEach(move => {
                 const square = document.querySelector(`.square[data-row="${move.row}"][data-col="${move.col}"]`);
-                square.classList.add('bg-green-400');
+                square.classList.add('highlight-possible');
             });
         }
 
@@ -278,7 +394,7 @@
         function clearSelection() {
             selectedPiece = null;
             document.querySelectorAll('.square').forEach(square => {
-                square.classList.remove('bg-yellow-400', 'bg-green-400');
+                square.classList.remove('highlight-selected', 'highlight-possible');
             });
         }
 
@@ -380,9 +496,6 @@
             if (move && move.capture) {
                 board[move.capture.row][move.capture.col] = null;
                 captured = true;
-                sounds.capture.play();
-            } else {
-                sounds.move.play();
             }
 
             if ((piece.color === 'white' && toRow === 0) || (piece.color === 'black' && toRow === 7)) {
@@ -392,7 +505,7 @@
             const square = document.querySelector(`.square[data-row="${toRow}"][data-col="${toCol}"] .piece`);
             if (square) {
                 square.classList.add('move-animation');
-                setTimeout(() => square.classList.remove('move-animation'), 300);
+                setTimeout(() => square.classList.remove('move-animation'), 400);
             }
 
             renderBoard();
@@ -481,9 +594,7 @@
                     if (board[row][col]) {
                         const piece = board[row][col];
                         let value = piece.king ? 3 : 1;
-                        // Positional advantage
                         value += (piece.color === 'white' ? (7 - row) : row) * 0.1;
-                        // Center control
                         if (col >= 2 && col <= 5) value += 0.2;
                         score += piece.color === currentPlayer ? value : -value;
                     }

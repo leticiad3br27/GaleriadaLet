@@ -1,39 +1,375 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo da Velha - Galeria de Jogos</title>
-    <link rel="stylesheet" href="../css/jogo-da-velha.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Jogo da Velha - Dinossauros Fofos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Chewy&display=swap" rel="stylesheet">
+  <style>
+    /* Reset básico */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Chewy', cursive;
+      background: linear-gradient(135deg, #e6f4e8 0%, #c8e6c9 100%);
+      min-height: 100vh;
+      color: #4a3728;
+      display: flex;
+      flex-direction: column;
+      background-image: url('https://www.transparenttextures.com/patterns/dino-footprints.png');
+      background-size: 200px;
+      background-repeat: repeat;
+    }
+
+    header {
+      background: #a5d6a7;
+      padding: 2rem 0 1rem 0;
+      text-align: center;
+      border-bottom: 3px solid #81c784;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      letter-spacing: 2px;
+      color: #689f38;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      background: linear-gradient(45deg, #689f38, #81c784);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    section {
+      background: #f1f8e9;
+      border-radius: 18px;
+      box-shadow: 0 4px 24px rgba(129, 199, 132, 0.15);
+      padding: 2rem 2.5rem;
+      margin: 1.5rem 0;
+      min-width: 320px;
+      max-width: 400px;
+      width: 100%;
+      transition: box-shadow 0.3s, transform 0.3s;
+      border: 2px solid #a5d6a7;
+    }
+
+    section:hover {
+      box-shadow: 0 8px 32px rgba(129, 199, 132, 0.25);
+      transform: scale(1.02);
+    }
+
+    h2 {
+      color: #689f38;
+      margin-bottom: 1.2rem;
+      text-align: center;
+      font-size: 1.5rem;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .game-mode {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    button {
+      background: linear-gradient(90deg, #81c784 60%, #a5d6a7 100%);
+      color: #4a3728;
+      border: none;
+      border-radius: 12px;
+      padding: 0.8rem 1.5rem;
+      font-size: 1.1rem;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(129, 199, 132, 0.15);
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    button:hover, button:focus {
+      background: linear-gradient(90deg, #a5d6a7 60%, #81c784 100%);
+      transform: scale(1.07);
+      outline: none;
+    }
+
+    #game-section.hidden {
+      display: none;
+    }
+
+    #game-board {
+      display: grid;
+      grid-template-columns: repeat(3, 80px);
+      grid-template-rows: repeat(3, 80px);
+      gap: 12px;
+      justify-content: center;
+      margin: 1.5rem auto;
+    }
+
+    .cell {
+      background: #e6f4e8;
+      border-radius: 10px;
+      font-size: 2.5rem;
+      color: #689f38;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(129, 199, 132, 0.1);
+      transition: background 0.2s, transform 0.1s;
+      user-select: none;
+      border: 2px solid #a5d6a7;
+      font-weight: bold;
+    }
+
+    .cell:hover {
+      background: #c8e6c9;
+      transform: scale(1.05);
+    }
+
+    .cell.x::before {
+      content: 'X';
+    }
+
+    .cell.o::before {
+      content: 'O';
+    }
+
+    #game-info {
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    #status {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: #4a3728;
+      min-height: 24px;
+    }
+
+    #restart {
+      margin: 1rem 0;
+      background: linear-gradient(90deg, #81c784 60%, #a5d6a7 100%);
+      color: #4a3728;
+    }
+
+    #restart.hidden {
+      display: none;
+    }
+
+    #scoreboard {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 1rem;
+      font-size: 1.1rem;
+      color: #4a3728;
+    }
+
+    #scoreboard span {
+      background: #c8e6c9;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+    }
+
+    footer {
+      background: #a5d6a7;
+      text-align: center;
+      padding: 1rem 0;
+      font-size: 1rem;
+      color: #689f38;
+      letter-spacing: 1px;
+      border-top: 3px solid #81c784;
+      box-shadow: 0 -6px 12px rgba(0, 0, 0, 0.1);
+      margin-top: auto;
+    }
+
+    /* Responsividade */
+    @media (max-width: 500px) {
+      section {
+        padding: 1rem 0.5rem;
+        min-width: unset;
+        max-width: 98vw;
+      }
+      #game-board {
+        grid-template-columns: repeat(3, 60px);
+        grid-template-rows: repeat(3, 60px);
+        gap: 8px;
+      }
+      .cell {
+        font-size: 1.7rem;
+      }
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <h1>Jogo da Velha</h1>
-    </header>
-    <main>
-        <section>
-            <h2>Escolha o Modo de Jogo</h2>
-            <div class="game-mode">
-                <button id="two-players">2 Jogadores</button>
-                <button id="vs-computer">1 Jogador (vs Computador)</button>
-            </div>
-        </section>
-        <section id="game-section" class="hidden">
-            <h2 id="game-title">Jogo da Velha</h2>
-            <div id="game-board"></div>
-            <div id="game-info">
-                <p id="status"></p>
-                <button id="restart" class="hidden">Reiniciar Jogo</button>
-                <div id="scoreboard">
-                    <span>Jogador X: <span id="scoreX">0</span></span>
-                    <span>Jogador O: <span id="scoreO">0</span></span>
-                </div>
-            </div>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2023 Galeria de Jogos. Todos os direitos reservados.</p>
-    </footer>
-    <script src="../js/jogo-da-velha.js"></script>
+  <header>
+    <h1>Jogo da Velha</h1>
+  </header>
+  <main>
+    <section id="menu-section">
+      <h2>Escolha o Modo de Jogo</h2>
+      <div class="game-mode">
+        <button id="pvp">Jogador vs Jogador</button>
+        <button id="pve">Jogador vs Computador</button>
+      </div>
+    </section>
+    <section id="game-section" class="hidden">
+      <h2>Jogo da Velha</h2>
+      <div id="game-board">
+        <div class="cell" data-index="0"></div>
+        <div class="cell" data-index="1"></div>
+        <div class="cell" data-index="2"></div>
+        <div class="cell" data-index="3"></div>
+        <div class="cell" data-index="4"></div>
+        <div class="cell" data-index="5"></div>
+        <div class="cell" data-index="6"></div>
+        <div class="cell" data-index="7"></div>
+        <div class="cell" data-index="8"></div>
+      </div>
+      <div id="game-info">
+        <div id="status"></div>
+        <button id="restart" class="hidden">Jogar Novamente</button>
+      </div>
+      <div id="scoreboard">
+        <span id="score-x">X: 0</span>
+        <span id="score-o">O: 0</span>
+      </div>
+    </section>
+  </main>
+  <footer>
+    <p>© 2025 Galeria do Leo. Todos os direitos reservados.</p>
+  </footer>
+  <script>
+    const cells = document.querySelectorAll('.cell');
+    const status = document.getElementById('status');
+    const restart = document.getElementById('restart');
+    const scoreX = document.getElementById('score-x');
+    const scoreO = document.getElementById('score-o');
+    const pvpButton = document.getElementById('pvp');
+    const pveButton = document.getElementById('pve');
+    const menuSection = document.getElementById('menu-section');
+    const gameSection = document.getElementById('game-section');
+
+    let board = ['', '', '', '', '', '', '', '', ''];
+    let currentPlayer = 'x';
+    let gameActive = true;
+    let gameMode = '';
+    let scores = { x: 0, o: 0 };
+
+    const winningCombinations = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8],
+      [0, 3, 6], [1, 4, 7], [2, 5, 8],
+      [0, 4, 8], [2, 4, 6]
+    ];
+
+    function handleCellClick(e) {
+      const cell = e.target;
+      const index = cell.getAttribute('data-index');
+
+      if (board[index] !== '' || !gameActive) return;
+
+      board[index] = currentPlayer;
+      cell.classList.add(currentPlayer);
+      checkResult();
+
+      if (gameActive && gameMode === 'pve' && currentPlayer === 'o') {
+        setTimeout(computerMove, 500);
+      }
+    }
+
+    function checkResult() {
+      let roundWon = false;
+      for (let i = 0; i < winningCombinations.length; i++) {
+        const [a, b, c] = winningCombinations[i];
+        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+          roundWon = true;
+          break;
+        }
+      }
+
+      if (roundWon) {
+        status.textContent = `Jogador ${currentPlayer.toUpperCase()} venceu!`;
+        scores[currentPlayer]++;
+        updateScoreboard();
+        gameActive = false;
+        restart.classList.remove('hidden');
+        return;
+      }
+
+      if (!board.includes('')) {
+        status.textContent = 'Empate!';
+        gameActive = false;
+        restart.classList.remove('hidden');
+        return;
+      }
+
+      currentPlayer = currentPlayer === 'x' ? 'o' : 'x';
+      status.textContent = `Vez do jogador ${currentPlayer.toUpperCase()}`;
+    }
+
+    function computerMove() {
+      let emptyCells = board.map((val, idx) => val === '' ? idx : null).filter(val => val !== null);
+      if (emptyCells.length === 0) return;
+
+      const randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+      board[randomIndex] = 'o';
+      cells[randomIndex].classList.add('o');
+      checkResult();
+    }
+
+    function updateScoreboard() {
+      scoreX.textContent = `X: ${scores.x}`;
+      scoreO.textContent = `O: ${scores.o}`;
+    }
+
+    function resetGame() {
+      board = ['', '', '', '', '', '', '', '', ''];
+      currentPlayer = 'x';
+      gameActive = true;
+      status.textContent = `Vez do jogador ${currentPlayer.toUpperCase()}`;
+      restart.classList.add('hidden');
+      cells.forEach(cell => {
+        cell.classList.remove('x', 'o');
+      });
+    }
+
+    function startGame(mode) {
+      gameMode = mode;
+      menuSection.classList.add('hidden');
+      gameSection.classList.remove('hidden');
+      resetGame();
+    }
+
+    cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+    restart.addEventListener('click', resetGame);
+    pvpButton.addEventListener('click', () => startGame('pvp'));
+    pveButton.addEventListener('click', () => startGame('pve'));
+
+    // Accessibility: keyboard support
+    cells.forEach(cell => {
+      cell.setAttribute('tabindex', '0');
+      cell.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleCellClick(e);
+        }
+      });
+    });
+
+    pvpButton.setAttribute('tabindex', '0');
+    pveButton.setAttribute('tabindex', '0');
+    restart.setAttribute('tabindex', '0');
+
+    status.textContent = 'Escolha o modo de jogo!';
+  </script>
 </body>
 </html>
