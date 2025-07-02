@@ -1,25 +1,131 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo 10</title>
-    <link rel="stylesheet" href="../css/jogo10.css">
-    <script src="../js/jogo10.js" defer></script>
+  <meta charset="UTF-8" />
+  <title>Bateria Virtual com Samples - Debug</title>
+  <style>
+    /* Mesma estilização básica */
+    body {
+      margin: 0; padding: 40px 20px;
+      background: #121212; color: #f0f0f0;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      user-select: none;
+    }
+    .bateria {
+      margin-top: 30px;
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 15px;
+    }
+    .pad {
+      background: #c0392b; border-radius: 15px;
+      width: 130px; height: 130px;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      font-weight: bold; font-size: 1.2rem;
+      cursor: pointer;
+      transition: 0.15s ease all;
+      box-shadow: 0 6px 15px rgba(255, 94, 87, 0.7);
+      color: white;
+    }
+    .pad.active {
+      background: #e74c3c;
+      box-shadow: 0 0 30px #e74c3c;
+      transform: scale(0.95);
+    }
+    .tecla {
+      font-size: 1rem; margin-top: 8px; color: #ffdede;
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <h1>Jogo 10</h1>
-    </header>
-    <main>
-        <section>
-            <h2>Descrição do Jogo 10</h2>
-            <p>Aqui você pode adicionar uma descrição detalhada sobre o Jogo 10, incluindo suas características, jogabilidade e outros detalhes relevantes.</p>
-            <img src="../imagens/jogo10_thumbnail.jpg" alt="Miniatura do Jogo 10">
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2023 Galeria de Jogos</p>
-    </footer>
+
+  <h1>Bateria Virtual com Samples</h1>
+  <p>Clique na tela para ativar áudio e use o teclado numérico</p>
+
+  <div class="bateria">
+    <div class="pad" data-sound="kick" data-key="Numpad1">Bumbo<div class="tecla">(Numpad 1)</div></div>
+    <div class="pad" data-sound="snare" data-key="Numpad2">Caixa<div class="tecla">(Numpad 2)</div></div>
+    <div class="pad" data-sound="hihat-closed" data-key="Numpad3">Chimbal fechado<div class="tecla">(Numpad 3)</div></div>
+    <div class="pad" data-sound="tom1" data-key="Numpad4">Tom 1<div class="tecla">(Numpad 4)</div></div>
+    <div class="pad" data-sound="tom2" data-key="Numpad5">Tom 2<div class="tecla">(Numpad 5)</div></div>
+    <div class="pad" data-sound="crash" data-key="Numpad6">Prato Crash<div class="tecla">(Numpad 6)</div></div>
+    <div class="pad" data-sound="hihat-open" data-key="Numpad7">Chimbal aberto<div class="tecla">(Numpad 7)</div></div>
+  </div>
+
+  <script>
+    const samples = {
+      kick: 'https://cdn.jsdelivr.net/gh/jbrown/mini-drum-kit/samples/kick.wav',
+      snare: 'https://cdn.jsdelivr.net/gh/jbrown/mini-drum-kit/samples/snare.wav',
+      'hihat-closed': 'https://cdn.jsdelivr.net/gh/jbrown/mini-drum-kit/samples/hihat-closed.wav',
+      tom1: 'https://cdn.jsdelivr.net/gh/jbrown/mini-drum-kit/samples/tom1.wav',
+      tom2: 'https://cdn.jsdelivr.net/gh/jbrown/mini-drum-kit/samples/tom2.wav',
+      crash: 'https://cdn.jsdelivr.net/gh/jbrown/mini-drum-kit/samples/crash.wav',
+      'hihat-open': 'https://cdn.jsdelivr.net/gh/jbrown/mini-drum-kit/samples/hihat-open.wav'
+    };
+
+    const audioElements = {};
+    for (const [name, url] of Object.entries(samples)) {
+      const audio = new Audio(url);
+      audio.preload = 'auto';
+      audioElements[name] = audio;
+    }
+
+    let audioStarted = false;
+
+    // Ativa áudio com clique, obrigatório para navegadores
+    document.body.addEventListener('click', async () => {
+      if (!audioStarted) {
+        try {
+          await AudioContext.prototype.resume.call(new AudioContext());
+          audioStarted = true;
+          alert('Áudio ativado! Use o teclado numérico para tocar a bateria.');
+        } catch {
+          alert('Não foi possível ativar o áudio.');
+        }
+      }
+    }, { once: true });
+
+    function playSound(name) {
+      if (!audioStarted) {
+        console.log('Áudio não ativado ainda. Clique na tela!');
+        return;
+      }
+      if (!audioElements[name]) return;
+      const soundClone = audioElements[name].cloneNode();
+      soundClone.play();
+    }
+
+    function activatePad(pad) {
+      pad.classList.add('active');
+      setTimeout(() => pad.classList.remove('active'), 130);
+    }
+
+    document.querySelectorAll('.pad').forEach(pad => {
+      pad.addEventListener('click', () => {
+        if (!audioStarted) {
+          alert('Clique na tela para ativar o áudio primeiro!');
+          return;
+        }
+        const sound = pad.getAttribute('data-sound');
+        playSound(sound);
+        activatePad(pad);
+      });
+    });
+
+    document.addEventListener('keydown', e => {
+      console.log(`Tecla pressionada: code=${e.code}, key=${e.key}`);
+      const pad = document.querySelector(`.pad[data-key="${e.code}"]`);
+      if (pad) {
+        if (!audioStarted) {
+          alert('Clique na tela para ativar o áudio primeiro!');
+          return;
+        }
+        const sound = pad.getAttribute('data-sound');
+        playSound(sound);
+        activatePad(pad);
+      }
+    });
+  </script>
+
 </body>
 </html>

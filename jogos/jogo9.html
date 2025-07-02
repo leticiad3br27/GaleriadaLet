@@ -1,33 +1,320 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo 9</title>
-    <link rel="stylesheet" href="../css/jogo9.css">
+    <title>Teclado de Piano Virtual Realista</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(to bottom, #2c3e50, #34495e);
+            font-family: Arial, sans-serif;
+            overflow-x: hidden; /* Evita overflow horizontal */
+        }
+
+        .keyboard-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+            width: 100%; /* Garante que o contêiner ocupe 100% da largura */
+            max-width: 1000px; /* Limita a largura máxima do teclado */
+        }
+
+        .keyboard {
+            display: flex;
+            flex-direction: row;
+            gap: 3px;
+            background: linear-gradient(to bottom, #1a1a1a, #2e2e2e);
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            position: relative;
+            width: 100%; /* Garante que o teclado ocupe 100% da largura do contêiner */
+            overflow: hidden; /* Evita que as teclas ultrapassem o contêiner */
+        }
+
+        .key {
+            width: 6vw; /* Largura das teclas em porcentagem da largura da tela */
+            height: 250px;
+            background: linear-gradient(to bottom, #fff, #e0e0e0);
+            border: 2px solid #333;
+            border-radius: 0 0 8px 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.1s ease, background 0.1s ease, box-shadow 0.1s ease;
+            position: relative;
+            box-shadow: inset 0 -5px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .key.black {
+            width: 3vw; /* Largura das teclas pretas em porcentagem da largura da tela */
+            height: 150px;
+            background: linear-gradient(to bottom, #1a1a1a, #333);
+            margin: 0 -1.5vw; /* Ajusta a margem para manter o alinhamento */
+            z-index: 1;
+            border-radius: 0 0 5px 5px;
+            box-shadow: inset 0 -3px 5px rgba(0, 0, 0, 0.4);
+        }
+
+        .key.active {
+            transform: translateY(5px);
+            background: linear-gradient(to bottom, #ccc, #bbb);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .key.black.active {
+            background: linear-gradient(to bottom, #444, #555);
+        }
+
+        .key-label {
+            color: #333;
+            font-size: 14px;
+            padding-bottom: 5px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .key.black .key-label {
+            color: #fff;
+        }
+
+        .note-label {
+            font-size: 12px;
+            position: absolute;
+            bottom: -20px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .key.black .note-label {
+            color: #ccc;
+        }
+
+        /* Colors for each note */
+        .note-C { color: #ff4d4d; } /* Red */
+        .note-Cs { color: #ff9933; } /* Orange */
+        .note-D { color: #ffff66; } /* Yellow */
+        .note-Ds { color: #66ff66; } /* Light Green */
+        .note-E { color: #33ccff; } /* Light Blue */
+        .note-F { color: #ff66cc; } /* Pink */
+        .note-Fs { color: #cc33ff; } /* Purple */
+        .note-G { color: #66cc99; } /* Teal */
+        .note-Gs { color: #ff3399; } /* Magenta */
+        .note-A { color: #3399ff; } /* Blue */
+        .note-As { color: #cc66ff; } /* Lilac */
+        .note-B { color: #99cc33; } /* Olive Green */
+
+        #controls {
+            display: flex;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        select, button {
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: #ecf0f1;
+            transition: background 0.2s;
+        }
+
+        select:hover, button:hover {
+            background: #bdc3c7;
+        }
+
+        #loading {
+            color: #fff;
+            font-size: 16px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .key {
+                height: 150px; /* Ajusta a altura das teclas em telas menores */
+            }
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Detalhes do Jogo 9</h1>
-    </header>
-    <main>
-        <section>
-            <h2>Descrição</h2>
-            <p>Aqui você pode adicionar uma descrição detalhada do Jogo 9.</p>
-        </section>
-        <section>
-            <h2>Imagens</h2>
-            <img src="../imagens/jogo9-thumbnail.jpg" alt="Thumbnail do Jogo 9">
-            <p>Adicione mais imagens relacionadas ao Jogo 9 aqui.</p>
-        </section>
-        <section>
-            <h2>Links</h2>
-            <p>Links úteis ou informações adicionais sobre o Jogo 9 podem ser adicionados aqui.</p>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2023 Galeria de Jogos</p>
-    </footer>
-    <script src="../js/jogo9.js"></script>
+    <div class="keyboard-container">
+        <div id="controls">
+            <select id="instrument">
+                <option value="piano">Piano</option>
+                <option value="sine">Sine</option>
+                <option value="square">Square</option>
+                <option value="triangle">Triangle</option>
+                <option value="sawtooth">Sawtooth</option>
+            </select>
+            <button id="playButton" onclick="togglePlay()">Play</button>
+        </div>
+        <div id="loading">Loading piano samples...</div>
+        <div class="keyboard" id="keyboard" style="display: none;"></div>
+    </div>
+
+    <script>
+        // Initialize the sampler for realistic piano sound
+        const piano = new Tone.Sampler({
+            urls: {
+                "C4": "C4.mp3",
+                "D#4": "Ds4.mp3",
+                "F#4": "Fs4.mp3",
+                "A4": "A4.mp3",
+            },
+            baseUrl: "https://tonejs.github.io/audio/salamander/",
+            onload: () => {
+                console.log("Piano samples loaded");
+                document.getElementById("loading").style.display = "none";
+                document.getElementById("keyboard").style.display = "flex";
+            },
+            onerror: (err) => {
+                console.error("Failed to load piano samples:", err);
+                document.getElementById("loading").textContent = "Failed to load piano samples.";
+            }
+        }).toDestination();
+
+        // Initialize the synthesizer for other waveforms
+        const synth = new Tone.Synth({
+            oscillator: { type: "sine" },
+            envelope: { attack: 0.005, decay: 0.1, sustain: 0.3, release: 1 }
+        }).toDestination();
+
+        // Musical notes with key mappings, following QWERTY order
+        const notes = [
+            { note: "C3", key: "q", isBlack: false, noteClass: "note-C" },
+            { note: "C#3", key: "w", isBlack: true, noteClass: "note-Cs" },
+            { note: "D3", key: "e", isBlack: false, noteClass: "note-D" },
+            { note: "D#3", key: "r", isBlack: true, noteClass: "note-Ds" },
+            { note: "E3", key: "t", isBlack: false, noteClass: "note-E" },
+            { note: "F3", key: "y", isBlack: false, noteClass: "note-F" },
+            { note: "F#3", key: "u", isBlack: true, noteClass: "note-Fs" },
+            { note: "G3", key: "i", isBlack: false, noteClass: "note-G" },
+            { note: "G#3", key: "o", isBlack: true, noteClass: "note-Gs" },
+            { note: "A3", key: "p", isBlack: false, noteClass: "note-A" },
+            { note: "A#3", key: "a", isBlack: true, noteClass: "note-As" },
+            { note: "B3", key: "s", isBlack: false, noteClass: "note-B" },
+            { note: "C4", key: "d", isBlack: false, noteClass: "note-C" },
+            { note: "C#4", key: "f", isBlack: true, noteClass: "note-Cs" },
+            { note: "D4", key: "g", isBlack: false, noteClass: "note-D" },
+            { note: "D#4", key: "h", isBlack: true, noteClass: "note-Ds" },
+            { note: "E4", key: "j", isBlack: false, noteClass: "note-E" },
+            { note: "F4", key: "k", isBlack: false, noteClass: "note-F" },
+            { note: "F#4", key: "l", isBlack: true, noteClass: "note-Fs" },
+            { note: "G4", key: "z", isBlack: false, noteClass: "note-G" },
+            { note: "G#4", key: "x", isBlack: true, noteClass: "note-Gs" },
+            { note: "A4", key: "c", isBlack: false, noteClass: "note-A" },
+            { note: "A#4", key: "v", isBlack: true, noteClass: "note-As" },
+            { note: "B4", key: "b", isBlack: false, noteClass: "note-B" },
+            { note: "C5", key: "n", isBlack: false, noteClass: "note-C" },
+            { note: "C#5", key: "m", isBlack: true, noteClass: "note-Cs" },
+            { note: "D5", key: "1", isBlack: false, noteClass: "note-D" },
+            { note: "D#5", key: "2", isBlack: true, noteClass: "note-Ds" },
+            { note: "E5", key: "3", isBlack: false, noteClass: "note-E" },
+            { note: "F5", key: "4", isBlack: false, noteClass: "note-F" },
+            { note: "F#5", key: "5", isBlack: true, noteClass: "note-Fs" },
+            { note: "G5", key: "6", isBlack: false, noteClass: "note-G" },
+            { note: "G#5", key: "7", isBlack: true, noteClass: "note-Gs" },
+            { note: "A5", key: "8", isBlack: false, noteClass: "note-A" },
+            { note: "A#5", key: "9", isBlack: true, noteClass: "note-As" },
+            { note: "B5", key: "0", isBlack: false, noteClass: "note-B" },
+            { note: "C6", key: "-", isBlack: false, noteClass: "note-C" }
+        ];
+
+        // Create the visual keyboard
+        const keyboard = document.getElementById("keyboard");
+        notes.forEach(({ note, key, isBlack, noteClass }) => {
+            const keyElement = document.createElement("div");
+            keyElement.className = `key ${isBlack ? "black" : ""}`;
+            keyElement.dataset.note = note;
+            keyElement.dataset.key = key;
+            keyElement.innerHTML = `
+                <span class="key-label">${key.toUpperCase()}</span>
+                <span class="note-label ${noteClass}">${note}</span>
+            `;
+            keyboard.appendChild(keyElement);
+
+            // Click events
+            keyElement.addEventListener("mousedown", () => playNote(note, keyElement));
+            keyElement.addEventListener("mouseup", () => stopNote(note, keyElement));
+            keyElement.addEventListener("mouseleave", () => stopNote(note, keyElement));
+        });
+
+        // Function to play a note
+        function playNote(note, element) {
+            if (Tone.context.state !== "running") return; // Ensure audio context is running
+            const instrument = document.getElementById("instrument").value;
+            if (instrument === "piano") {
+                piano.triggerAttack(note);
+            } else {
+                synth.set({ oscillator: { type: instrument } });
+                synth.triggerAttack(note);
+            }
+            element.classList.add("active");
+        }
+
+        // Function to stop a note
+        function stopNote(note, element) {
+            const instrument = document.getElementById("instrument").value;
+            if (instrument === "piano") {
+                piano.triggerRelease(note);
+            } else {
+                synth.triggerRelease();
+            }
+            element.classList.remove("active");
+        }
+
+        // Keyboard event listeners
+        document.addEventListener("keydown", (e) => {
+            const noteObj = notes.find(n => n.key === e.key.toLowerCase());
+            if (noteObj && !e.repeat) {
+                const keyElement = document.querySelector(`.key[data-key="${e.key.toLowerCase()}"]`);
+                playNote(noteObj.note, keyElement);
+            }
+        });
+
+        document.addEventListener("keyup", (e) => {
+            const noteObj = notes.find(n => n.key === e.key.toLowerCase());
+            if (noteObj) {
+                const keyElement = document.querySelector(`.key[data-key="${e.key.toLowerCase()}"]`);
+                stopNote(noteObj.note, keyElement);
+            }
+        });
+
+        // Instrument type control
+        document.getElementById("instrument").addEventListener("change", (e) => {
+            if (e.target.value !== "piano") {
+                synth.set({ oscillator: { type: e.target.value } });
+            }
+        });
+
+        // Play button to initialize audio context
+        let isAudioContextStarted = false;
+        async function togglePlay() {
+            if (!isAudioContextStarted) {
+                try {
+                    await Tone.start();
+                    isAudioContextStarted = true;
+                    document.getElementById("playButton").textContent = "Audio Started";
+                    document.getElementById("playButton").disabled = true; // Disable after starting
+                } catch (err) {
+                    console.error("Failed to start audio context:", err);
+                }
+            }
+        }
+    </script>
 </body>
 </html>
