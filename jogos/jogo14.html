@@ -3,27 +3,545 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo 14</title>
-    <link rel="stylesheet" href="../css/jogo14.css">
+    <title>Tetris Clássico</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #202020;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            color: white;
+        }
+        
+        #game-container {
+            display: flex;
+            gap: 20px;
+        }
+        
+        #game-board {
+            width: 300px;
+            height: 600px;
+            border: 2px solid #333;
+            background-color: #111;
+            display: grid;
+            grid-template-rows: repeat(20, 1fr);
+            grid-template-columns: repeat(10, 1fr);
+        }
+        
+        .block {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #222;
+        }
+        
+        .piece {
+            position: absolute;
+        }
+        
+        #info-panel {
+            width: 150px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        #next-piece {
+            width: 120px;
+            height: 120px;
+            background-color: #111;
+            border: 2px solid #333;
+            display: grid;
+            grid-template-rows: repeat(4, 1fr);
+            grid-template-columns: repeat(4, 1fr);
+        }
+        
+        #score-display {
+            font-size: 20px;
+            text-align: center;
+        }
+        
+        #controls {
+            margin-top: 20px;
+        }
+        
+        button {
+            background-color: #444;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        
+        button:hover {
+            background-color: #555;
+        }
+        
+        #game-over {
+            display: none;
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .color-0 { background-color: #111; } /* Vazio */
+        .color-1 { background-color: #00FFFF; } /* I */
+        .color-2 { background-color: #0000FF; } /* J */
+        .color-3 { background-color: #FF7F00; } /* L */
+        .color-4 { background-color: #FFFF00; } /* O */
+        .color-5 { background-color: #00FF00; } /* S */
+        .color-6 { background-color: #FF0000; } /* Z */
+        .color-7 { background-color: #9400D3; } /* T */
+    </style>
 </head>
 <body>
-    <header>
-        <h1>Jogo 14</h1>
-    </header>
-    <main>
-        <section>
-            <h2>Descrição do Jogo 14</h2>
-            <p>Aqui você pode adicionar uma descrição detalhada do Jogo 14, incluindo suas características, jogabilidade e outros detalhes relevantes.</p>
-            <img src="../imagens/jogo14_thumbnail.jpg" alt="Miniatura do Jogo 14">
-        </section>
-        <section>
-            <h2>Informações Adicionais</h2>
-            <p>Adicione informações adicionais, como desenvolvedor, data de lançamento, e links para download ou compra.</p>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2023 Galeria de Jogos</p>
-    </footer>
-    <script src="../js/jogo14.js"></script>
+    <h1>Tetris Clássico</h1>
+    <div id="game-container">
+        <div id="game-board"></div>
+        <div id="info-panel">
+            <div id="score-display">
+                Pontuação: <span id="score">0</span><br>
+                Nível: <span id="level">1</span><br>
+                Linhas: <span id="lines">0</span>
+            </div>
+            <div>
+                <h3>Próxima peça:</h3>
+                <div id="next-piece"></div>
+            </div>
+            <div id="controls">
+                <button id="start-btn">Iniciar</button>
+                <button id="pause-btn">Pausar</button>
+            </div>
+        </div>
+    </div>
+    <div id="game-over">
+        <h2>Game Over!</h2>
+        <p>Sua pontuação: <span id="final-score">0</span></p>
+        <button id="restart-btn">Jogar Novamente</button>
+    </div>
+
+    <script>
+        // Configurações do jogo
+        const COLS = 10;
+        const ROWS = 20;
+        const BLOCK_SIZE = 30;
+        const COLORS = [
+            'color-0', // Vazio
+            'color-1', // I - ciano
+            'color-2', // J - azul
+            'color-3', // L - laranja
+            'color-4', // O - amarelo
+            'color-5', // S - verde
+            'color-6', // Z - vermelho
+            'color-7'  // T - roxo
+        ];
+        
+        // Formatos das peças
+        const SHAPES = [
+            [], // 0 - vazio
+            [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]], // I
+            [[2, 0, 0], [2, 2, 2], [0, 0, 0]],                         // J
+            [[0, 0, 3], [3, 3, 3], [0, 0, 0]],                         // L
+            [[4, 4], [4, 4]],                                          // O
+            [[0, 5, 5], [5, 5, 0], [0, 0, 0]],                         // S
+            [[6, 6, 0], [0, 6, 6], [0, 0, 0]],                         // Z
+            [[0, 7, 0], [7, 7, 7], [0, 0, 0]]                          // T
+        ];
+        
+        // Pontuação por linhas completadas
+        const SCORES = {
+            1: 100,
+            2: 300,
+            3: 500,
+            4: 800
+        };
+        
+        // Variáveis do jogo
+        let board = [];
+        let currentPiece = null;
+        let nextPiece = null;
+        let score = 0;
+        let lines = 0;
+        let level = 1;
+        let gameOver = false;
+        let isPaused = false;
+        let dropInterval;
+        let dropStart;
+        
+        // Elementos DOM
+        const gameBoard = document.getElementById('game-board');
+        const nextPieceDisplay = document.getElementById('next-piece');
+        const scoreDisplay = document.getElementById('score');
+        const levelDisplay = document.getElementById('level');
+        const linesDisplay = document.getElementById('lines');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const startBtn = document.getElementById('start-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const gameOverDisplay = document.getElementById('game-over');
+        
+        // Inicialização do jogo
+        function init() {
+            createBoard();
+            drawBoard();
+            generateNextPiece();
+            
+            startBtn.addEventListener('click', startGame);
+            pauseBtn.addEventListener('click', togglePause);
+            restartBtn.addEventListener('click', restartGame);
+            
+            document.addEventListener('keydown', control);
+        }
+        
+        // Cria o tabuleiro vazio
+        function createBoard() {
+            board = Array(ROWS).fill().map(() => Array(COLS).fill(0));
+        }
+        
+        // Desenha o tabuleiro
+        function drawBoard() {
+            gameBoard.innerHTML = '';
+            
+            for (let y = 0; y < ROWS; y++) {
+                for (let x = 0; x < COLS; x++) {
+                    const block = document.createElement('div');
+                    block.className = 'block ' + COLORS[board[y][x]];
+                    block.style.gridRow = y + 1;
+                    block.style.gridColumn = x + 1;
+                    gameBoard.appendChild(block);
+                }
+            }
+        }
+        
+        // Desenha a próxima peça no painel de informações
+        function drawNextPiece() {
+            nextPieceDisplay.innerHTML = '';
+            
+            const shape = SHAPES[nextPiece.type];
+            
+            for (let y = 0; y < shape.length; y++) {
+                for (let x = 0; x < shape[y].length; x++) {
+                    if (shape[y][x]) {
+                        const block = document.createElement('div');
+                        block.className = 'block ' + COLORS[shape[y][x]];
+                        block.style.gridRow = y + 1;
+                        block.style.gridColumn = x + 1;
+                        nextPieceDisplay.appendChild(block);
+                    }
+                }
+            }
+        }
+        
+        // Gera uma nova peça aleatória
+        function generatePiece() {
+            const type = Math.floor(Math.random() * 7) + 1; // 1-7
+            const shape = SHAPES[type];
+            const x = Math.floor(COLS / 2) - Math.floor(shape[0].length / 2);
+            const y = 0;
+            
+            return { type, shape, x, y };
+        }
+        
+        // Gera a próxima peça
+        function generateNextPiece() {
+            nextPiece = generatePiece();
+            drawNextPiece();
+        }
+        
+        // Coloca a próxima peça em jogo e gera uma nova próxima peça
+        function spawnPiece() {
+            currentPiece = nextPiece;
+            generateNextPiece();
+            
+            // Verifica se a peça pode ser spawnada (game over)
+            if (collision(0, 0)) {
+                endGame();
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // Verifica colisão
+        function collision(offsetX, offsetY, rotatedShape = null) {
+            const shape = rotatedShape || currentPiece.shape;
+            
+            for (let y = 0; y < shape.length; y++) {
+                for (let x = 0; x < shape[y].length; x++) {
+                    if (shape[y][x] !== 0) {
+                        const newX = currentPiece.x + x + offsetX;
+                        const newY = currentPiece.y + y + offsetY;
+                        
+                        if (
+                            newX < 0 || 
+                            newX >= COLS || 
+                            newY >= ROWS ||
+                            (newY >= 0 && board[newY][newX] !== 0)
+                        ) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            
+            return false;
+        }
+        
+        // Rotaciona a peça
+        function rotate() {
+            if (isPaused || gameOver) return;
+            
+            const shape = currentPiece.shape;
+            const rows = shape.length;
+            const cols = shape[0].length;
+            const newShape = Array(cols).fill().map(() => Array(rows).fill(0));
+            
+            // Transposta da matriz
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    newShape[x][y] = shape[rows - 1 - y][x];
+                }
+            }
+            
+            // Verifica se a rotação é possível
+            if (!collision(0, 0, newShape)) {
+                currentPiece.shape = newShape;
+                drawBoard();
+                drawPiece();
+            }
+        }
+        
+        // Move a peça para a esquerda
+        function moveLeft() {
+            if (isPaused || gameOver) return;
+            
+            if (!collision(-1, 0)) {
+                currentPiece.x--;
+                drawBoard();
+                drawPiece();
+            }
+        }
+        
+        // Move a peça para a direita
+        function moveRight() {
+            if (isPaused || gameOver) return;
+            
+            if (!collision(1, 0)) {
+                currentPiece.x++;
+                drawBoard();
+                drawPiece();
+            }
+        }
+        
+        // Move a peça para baixo
+        function moveDown() {
+            if (isPaused || gameOver) return;
+            
+            if (!collision(0, 1)) {
+                currentPiece.y++;
+                drawBoard();
+                drawPiece();
+                return true;
+            }
+            
+            lockPiece();
+            return false;
+        }
+        
+        // Drop rápido (cair até o chão)
+        function hardDrop() {
+            if (isPaused || gameOver) return;
+            
+            while (moveDown()) {} // Continua movendo para baixo até não poder mais
+        }
+        
+        // Trava a peça no lugar e verifica linhas completas
+        function lockPiece() {
+            const shape = currentPiece.shape;
+            
+            for (let y = 0; y < shape.length; y++) {
+                for (let x = 0; x < shape[y].length; x++) {
+                    if (shape[y][x] !== 0) {
+                        const boardY = currentPiece.y + y;
+                        const boardX = currentPiece.x + x;
+                        
+                        if (boardY >= 0) {
+                            board[boardY][boardX] = shape[y][x];
+                        }
+                    }
+                }
+            }
+            
+            checkLines();
+            spawnPiece();
+        }
+        
+        // Desenha a peça atual no tabuleiro
+        function drawPiece() {
+            const shape = currentPiece.shape;
+            
+            for (let y = 0; y < shape.length; y++) {
+                for (let x = 0; x < shape[y].length; x++) {
+                    if (shape[y][x] !== 0) {
+                        const boardY = currentPiece.y + y;
+                        const boardX = currentPiece.x + x;
+                        
+                        if (boardY >= 0) {
+                            const blocks = document.querySelectorAll(`.block[style="grid-row: ${boardY + 1} / auto; grid-column: ${boardX + 1} / auto;"]`);
+                            if (blocks.length > 0) {
+                                blocks[0].className = 'block ' + COLORS[shape[y][x]];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Verifica se há linhas completas
+        function checkLines() {
+            let linesCleared = 0;
+            
+            for (let y = ROWS - 1; y >= 0; y--) {
+                if (board[y].every(cell => cell !== 0)) {
+                    // Remove a linha
+                    board.splice(y, 1);
+                    // Adiciona uma nova linha vazia no topo
+                    board.unshift(Array(COLS).fill(0));
+                    linesCleared++;
+                    y++; // Verifica a mesma posição novamente (já que deslocamos as linhas para baixo)
+                }
+            }
+            
+            if (linesCleared > 0) {
+                updateScore(linesCleared);
+            }
+        }
+        
+        // Atualiza a pontuação
+        function updateScore(linesCleared) {
+            lines += linesCleared;
+            score += SCORES[linesCleared] * level;
+            
+            // Aumenta o nível a cada 10 linhas
+            level = Math.floor(lines / 10) + 1;
+            
+            // Atualiza o display
+            scoreDisplay.textContent = score;
+            linesDisplay.textContent = lines;
+            levelDisplay.textContent = level;
+            
+            // Ajusta a velocidade do jogo
+            clearInterval(dropInterval);
+            dropInterval = setInterval(drop, 1000 - (level - 1) * 50);
+        }
+        
+        // Função de queda automática
+        function drop() {
+            if (!isPaused && !gameOver) {
+                moveDown();
+            }
+        }
+        
+        // Controles do jogo
+        function control(e) {
+            if (gameOver) return;
+            
+            switch (e.keyCode) {
+                case 37: // Left arrow
+                    moveLeft();
+                    break;
+                case 39: // Right arrow
+                    moveRight();
+                    break;
+                case 40: // Down arrow
+                    moveDown();
+                    break;
+                case 38: // Up arrow
+                    rotate();
+                    break;
+                case 32: // Space
+                    hardDrop();
+                    break;
+                case 80: // P
+                    togglePause();
+                    break;
+            }
+        }
+        
+        // Inicia o jogo
+        function startGame() {
+            if (!gameOver && !isPaused) return;
+            
+            if (gameOver) {
+                restartGame();
+                return;
+            }
+            
+            isPaused = false;
+            dropStart = Date.now();
+            dropInterval = setInterval(drop, 1000 - (level - 1) * 50);
+            
+            pauseBtn.disabled = false;
+            pauseBtn.textContent = 'Pausar';
+        }
+        
+        // Pausa/despausa o jogo
+        function togglePause() {
+            if (gameOver) return;
+            
+            isPaused = !isPaused;
+            
+            if (isPaused) {
+                clearInterval(dropInterval);
+                pauseBtn.textContent = 'Continuar';
+            } else {
+                dropInterval = setInterval(drop, 1000 - (level - 1) * 50);
+                pauseBtn.textContent = 'Pausar';
+            }
+        }
+        
+        // Termina o jogo
+        function endGame() {
+            gameOver = true;
+            clearInterval(dropInterval);
+            finalScoreDisplay.textContent = score;
+            gameOverDisplay.style.display = 'block';
+        }
+        
+        // Reinicia o jogo
+        function restartGame() {
+            gameOver = false;
+            isPaused = false;
+            score = 0;
+            lines = 0;
+            level = 1;
+            
+            scoreDisplay.textContent = score;
+            linesDisplay.textContent = lines;
+            levelDisplay.textContent = level;
+            
+            createBoard();
+            drawBoard();
+            generateNextPiece();
+            spawnPiece();
+            gameOverDisplay.style.display = 'none';
+        }
+        
+        // Inicializa o jogo quando o DOM estiver carregado
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
 </body>
 </html>

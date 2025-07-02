@@ -1,212 +1,204 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo da Minhoquinha</title>
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
-            font-family: 'Segoe UI', Arial, sans-serif;
-        }
-        canvas {
-            border: 6px solid #f39c12; /* Borda laranja vibrante */
-            background: #2c2c2c;
-            border-radius: 15px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-        }
-        h1 {
-            color: #e74c3c;
-            font-size: 36px;
-            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
-            margin-bottom: 15px;
-        }
-        #score {
-            font-size: 28px;
-            color: #2c3e50;
-            font-weight: bold;
-            margin-bottom: 15px;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-        }
-        #restart {
-            padding: 12px 24px;
-            font-size: 20px;
-            background: linear-gradient(45deg, #e74c3c, #c0392b);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            display: none;
-            margin-top: 15px;
-            transition: transform 0.2s;
-        }
-        #restart:hover {
-            transform: scale(1.05);
-            background: linear-gradient(45deg, #c0392b, #e74c3c);
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Jogo da Minhoquinha</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background: radial-gradient(circle at center, #b2fefa, #0ed2f7);
+      font-family: 'Segoe UI', sans-serif;
+      overflow: hidden;
+    }
+    canvas {
+      border: 6px solid #f39c12;
+      background: linear-gradient(135deg, #1c1c1c, #2c2c2c);
+      border-radius: 16px;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6), 0 0 15px limegreen;
+      max-width: 90vw;
+      max-height: 90vw;
+    }
+    h1 {
+      color: #f39c12;
+      font-size: 38px;
+      text-shadow: 2px 2px 8px rgba(0,0,0,0.6);
+      margin: 10px 0;
+    }
+    #score {
+      font-size: 24px;
+      font-weight: bold;
+      color: #ffffff;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    }
+    #restart {
+      padding: 12px 24px;
+      font-size: 20px;
+      background: linear-gradient(45deg, #e74c3c, #c0392b);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: none;
+      margin-top: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      transition: transform 0.2s;
+    }
+    #restart:hover {
+      transform: scale(1.05);
+      background: linear-gradient(45deg, #c0392b, #e74c3c);
+    }
+  </style>
 </head>
 <body>
-    <h1>Jogo da Minhoquinha</h1>
-    <div id="score">Pontuação: 0</div>
-    <canvas id="gameCanvas" width="400" height="400"></canvas>
-    <button id="restart">Jogar Novamente</button>
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const scoreDisplay = document.getElementById('score');
-        const restartButton = document.getElementById('restart');
+  <h1>🐍 Jogo da Minhoquinha</h1>
+  <div id="score">Pontuação: 0</div>
+  <canvas id="gameCanvas" width="400" height="400"></canvas>
+  <button id="restart">Jogar Novamente</button>
 
-        const gridSize = 20;
-        const tileCount = canvas.width / gridSize;
-        let snake = [
-            { x: 10, y: 10 },
-            { x: 9, y: 10 },
-            { x: 8, y: 10 }
-        ];
-        let apple = { x: 15, y: 15 };
-        let dx = 1;
-        let dy = 0;
-        let score = 0;
-        let gameOver = false;
-        let speed = 150;
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const scoreDisplay = document.getElementById('score');
+    const restartBtn = document.getElementById('restart');
 
-        function getRandomInt(min, max) {
-            return Math.floor(Math.random() * (max - min)) + min;
+    const gridSize = 20;
+    const tileCount = canvas.width / gridSize;
+    let snake, apple, dx, dy, score, gameOver, speed;
+
+    function initGame() {
+      snake = [
+        { x: 10, y: 10 },
+        { x: 9, y: 10 },
+        { x: 8, y: 10 }
+      ];
+      apple = generateApple();
+      dx = 1;
+      dy = 0;
+      score = 0;
+      speed = 150;
+      gameOver = false;
+      scoreDisplay.textContent = `Pontuação: ${score}`;
+      restartBtn.style.display = 'none';
+      drawGame();
+    }
+
+    function generateApple() {
+      let newApple;
+      do {
+        newApple = {
+          x: Math.floor(Math.random() * tileCount),
+          y: Math.floor(Math.random() * tileCount)
+        };
+      } while (snake.some(segment => segment.x === newApple.x && segment.y === newApple.y));
+      return newApple;
+    }
+
+    function drawGame() {
+      if (gameOver) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#f1c40f';
+        ctx.font = '42px Segoe UI';
+        ctx.textAlign = 'center';
+        ctx.fillText('Game Over!', canvas.width / 2, canvas.height / 2 - 10);
+        ctx.font = '24px Segoe UI';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(`Pontuação: ${score}`, canvas.width / 2, canvas.height / 2 + 40);
+        restartBtn.style.display = 'block';
+        return;
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 🍎 Maçã com brilho
+      const appleGradient = ctx.createRadialGradient(
+        apple.x * gridSize + gridSize / 2, apple.y * gridSize + gridSize / 2, 4,
+        apple.x * gridSize + gridSize / 2, apple.y * gridSize + gridSize / 2, 10
+      );
+      appleGradient.addColorStop(0, "#ff6666");
+      appleGradient.addColorStop(1, "#c0392b");
+
+      ctx.fillStyle = appleGradient;
+      ctx.beginPath();
+      ctx.arc(apple.x * gridSize + gridSize / 2, apple.y * gridSize + gridSize / 2, gridSize / 2.3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 🐍 Movimento
+      const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+      snake.unshift(head);
+
+      if (head.x === apple.x && head.y === apple.y) {
+        score += 10;
+        scoreDisplay.textContent = `Pontuação: ${score}`;
+        apple = generateApple();
+        speed = Math.max(70, speed - 3);
+        // new Audio('https://www.myinstants.com/media/sounds/coin.mp3').play(); // opcional
+      } else {
+        snake.pop();
+      }
+
+      // 🐍 Desenhar cobrinha
+      snake.forEach((segment, index) => {
+        ctx.beginPath();
+        ctx.roundRect(segment.x * gridSize, segment.y * gridSize, gridSize - 2, gridSize - 2, 6);
+        const gradient = ctx.createLinearGradient(
+          segment.x * gridSize, segment.y * gridSize,
+          (segment.x + 1) * gridSize, (segment.y + 1) * gridSize
+        );
+        if (index === 0) {
+          gradient.addColorStop(0, '#f7dc6f');
+          gradient.addColorStop(1, '#f1c40f');
+          ctx.strokeStyle = '#f39c12';
+        } else {
+          gradient.addColorStop(0, '#2ecc71');
+          gradient.addColorStop(1, '#27ae60');
+          ctx.strokeStyle = 'rgba(0,0,0,0.5)';
         }
+        ctx.fillStyle = gradient;
+        ctx.shadowColor = 'lime';
+        ctx.shadowBlur = 6;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      });
 
-        function drawGame() {
-            if (gameOver) {
-                ctx.fillStyle = 'rgba(44, 62, 80, 0.8)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#ecf0f1';
-                ctx.font = '40px Segoe UI';
-                ctx.textAlign = 'center';
-                ctx.fillText('Game Over!', canvas.width / 2, canvas.height / 2);
-                ctx.font = '24px Segoe UI';
-                ctx.fillText(`Pontuação: ${score}`, canvas.width / 2, canvas.height / 2 + 50);
-                restartButton.style.display = 'block';
-                return;
-            }
+      // 🧱 Colisão com borda e corpo
+      if (
+        head.x < 0 || head.x >= tileCount ||
+        head.y < 0 || head.y >= tileCount ||
+        snake.slice(1).some(s => s.x === head.x && s.y === head.y)
+      ) {
+        gameOver = true;
+      }
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+      setTimeout(drawGame, speed);
+    }
 
-            // Desenhar maçã com efeito de brilho
-            ctx.fillStyle = '#e74c3c';
-            ctx.beginPath();
-            ctx.arc(apple.x * gridSize + gridSize / 2, apple.y * gridSize + gridSize / 2, gridSize / 2 - 2, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-            ctx.beginPath();
-            ctx.arc(apple.x * gridSize + gridSize / 3, apple.y * gridSize + gridSize / 3, gridSize / 4, 0, Math.PI * 2);
-            ctx.fill();
+    // ⌨️ WASD e Setas
+    let lastDirection = { dx: 1, dy: 0 };
+    document.addEventListener('keydown', e => {
+      if (gameOver) return;
+      const key = e.key.toLowerCase();
+      if ((key === 'arrowup' || key === 'w') && lastDirection.dy === 0) { dx = 0; dy = -1; }
+      if ((key === 'arrowdown' || key === 's') && lastDirection.dy === 0) { dx = 0; dy = 1; }
+      if ((key === 'arrowleft' || key === 'a') && lastDirection.dx === 0) { dx = -1; dy = 0; }
+      if ((key === 'arrowright' || key === 'd') && lastDirection.dx === 0) { dx = 1; dy = 0; }
+      lastDirection = { dx, dy };
+    });
 
-            // Mover cobrinha
-            const head = { x: snake[0].x + dx, y: snake[0].y + dy };
-            snake.unshift(head);
+    restartBtn.addEventListener('click', initGame);
 
-            // Verificar se comeu a maçã
-            if (head.x === apple.x && head.y === apple.y) {
-                score += 10;
-                scoreDisplay.textContent = `Pontuação: ${score}`;
-                apple = { x: getRandomInt(0, tileCount), y: getRandomInt(0, tileCount) };
-                speed = Math.max(100, speed - 5);
-            } else {
-                snake.pop();
-            }
-
-            // Desenhar cobrinha com cabeça destacada
-            snake.forEach((segment, index) => {
-                if (index === 0) {
-                    // Cabeça da cobrinha (amarela)
-                    const gradient = ctx.createLinearGradient(
-                        segment.x * gridSize, segment.y * gridSize,
-                        (segment.x + 1) * gridSize, (segment.y + 1) * gridSize
-                    );
-                    gradient.addColorStop(0, '#f1c40f');
-                    gradient.addColorStop(1, '#f39c12');
-                    ctx.fillStyle = gradient;
-                    ctx.beginPath();
-                    ctx.roundRect(segment.x * gridSize, segment.y * gridSize, gridSize - 2, gridSize - 2, 5);
-                    ctx.fill();
-                    ctx.strokeStyle = '#e67e22';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                } else {
-                    // Corpo da cobrinha (verde)
-                    const gradient = ctx.createLinearGradient(
-                        segment.x * gridSize, segment.y * gridSize,
-                        (segment.x + 1) * gridSize, (segment.y + 1) * gridSize
-                    );
-                    gradient.addColorStop(0, '#2ecc71');
-                    gradient.addColorStop(1, '#27ae60');
-                    ctx.fillStyle = gradient;
-                    ctx.beginPath();
-                    ctx.roundRect(segment.x * gridSize, segment.y * gridSize, gridSize - 2, gridSize - 2, 5);
-                    ctx.fill();
-                    ctx.strokeStyle = '#219653';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                }
-            });
-
-            // Verificar colisão com bordas
-            if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
-                gameOver = true;
-            }
-
-            // Verificar colisão com o próprio corpo
-            for (let i = 1; i < snake.length; i++) {
-                if (head.x === snake[i].x && head.y === snake[i].y) {
-                    gameOver = true;
-                }
-            }
-
-            setTimeout(drawGame, speed);
-        }
-
-        document.addEventListener('keydown', (e) => {
-            if (gameOver) return;
-            switch (e.key) {
-                case 'ArrowUp':
-                    if (dy !== 1) { dx = 0; dy = -1; }
-                    break;
-                case 'ArrowDown':
-                    if (dy !== -1) { dx = 0; dy = 1; }
-                    break;
-                case 'ArrowLeft':
-                    if (dx !== 1) { dx = -1; dy = 0; }
-                    break;
-                case 'ArrowRight':
-                    if (dx !== -1) { dx = 1; dy = 0; }
-                    break;
-            }
-        });
-
-        restartButton.addEventListener('click', () => {
-            snake = [
-                { x: 10, y: 10 },
-                { x: 9, y: 10 },
-                { x: 8, y: 10 }
-            ];
-            apple = { x: 15, y: 15 };
-            dx = 1;
-            dy = 0;
-            score = 0;
-            speed = 150;
-            gameOver = false;
-            scoreDisplay.textContent = `Pontuação: ${score}`;
-            restartButton.style.display = 'none';
-            drawGame();
-        });
-
-        drawGame();
-    </script>
+    initGame();
+  </script>
 </body>
 </html>
